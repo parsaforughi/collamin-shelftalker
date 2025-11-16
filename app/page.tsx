@@ -469,12 +469,6 @@ export default function Page() {
               {loading ? "در حال ساخت پرتره زمستونی..." : "بزن که یخ بزنی"}
               {!loading && <span className="btn-shimmer" />}
             </button>
-
-            {output && (
-              <button className="download-btn" onClick={handleDownload}>
-                دانلود تصویر نهایی ⬇️
-              </button>
-            )}
           </div>
 
           {/* RESULT */}
@@ -485,6 +479,11 @@ export default function Page() {
             >
               <img src={output} alt="generated" />
             </div>
+          )}
+          {output && (
+            <button className="download-btn mt-4" onClick={handleDownload}>
+              دانلود تصویر نهایی ⬇️
+            </button>
           )}
 
           {/* FOOTER */}
