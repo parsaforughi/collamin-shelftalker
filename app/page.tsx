@@ -226,6 +226,13 @@ export default function Page() {
           }
         }
 
+        .snow-container {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          pointer-events: none;
+        }
+
         /* ICE reveal (بدون ماسک خراب‌کننده) */
         .ice-reveal {
           position: relative;
@@ -364,15 +371,60 @@ export default function Page() {
 
         .download-btn {
           width: 100%;
-          margin-top: 0.75rem;
-          padding: 0.85rem;
+          margin-top: 0.85rem;
+          padding: 0.95rem;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.98);
-          font-weight: 600;
-          border: 1px solid rgba(30, 80, 120, 0.22);
+          background: linear-gradient(135deg, #ffffff, #e8f3ff);
+          font-weight: 700;
+          color: #0d294a;
+          border: 1px solid rgba(100, 140, 200, 0.32);
           box-shadow:
-            0 10px 22px rgba(80, 140, 210, 0.28),
-            0 0 14px rgba(180, 215, 255, 0.7);
+            0 12px 28px rgba(40, 120, 200, 0.28),
+            0 0 18px rgba(180, 215, 255, 0.8);
+          position: relative;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.15s ease;
+        }
+
+        .download-btn:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            0 14px 32px rgba(40, 120, 200, 0.38),
+            0 0 20px rgba(180, 215, 255, 1);
+        }
+
+        .download-btn:active {
+          transform: scale(0.97);
+        }
+
+        .download-btn::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            120deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.8) 45%,
+            transparent 90%
+          );
+          transform: translateX(-130%);
+          animation: shimmerDL 3.6s infinite;
+          pointer-events: none;
+        }
+
+        @keyframes shimmerDL {
+          0% {
+            transform: translateX(-130%);
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(130%);
+            opacity: 0;
+          }
         }
       `}</style>
 
@@ -380,21 +432,22 @@ export default function Page() {
       <div className="winter-layer aurora" />
       <div className="winter-layer snowfield" />
 
-      {/* Snowflakes */}
-      {Array.from({ length: 32 }).map((_, i) => (
-        <div
-          key={i}
-          className="snowflake"
-          style={{
-            left: `${Math.random() * 100}%`,
-            animationDuration: `${11 + Math.random() * 10}s, ${6 + Math.random() * 5
-              }s`,
-            fontSize: `${10 + Math.random() * 14}px`,
-          }}
-        >
-          ❄
-        </div>
-      ))}
+      {/* Snow container – ensures snow renders above all layers */}
+      <div className="snow-container">
+        {Array.from({ length: 32 }).map((_, i) => (
+          <div
+            key={i}
+            className="snowflake"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDuration: `${11 + Math.random() * 10}s, ${6 + Math.random() * 5}s`,
+              fontSize: `${10 + Math.random() * 14}px`,
+            }}
+          >
+            ❄
+          </div>
+        ))}
+      </div>
 
       <main
         dir="rtl"
