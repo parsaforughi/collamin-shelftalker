@@ -8,12 +8,14 @@ export default function Page() {
   const [output, setOutput] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Cleanup preview URL on unmount/change
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
+  // Cleanup output URL on unmount/change
   useEffect(() => {
     return () => {
       if (output) URL.revokeObjectURL(output);
@@ -23,7 +25,9 @@ export default function Page() {
   function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     if (!file) return;
+
     setImage(file);
+    setOutput(null); // reset old result
 
     const reader = new FileReader();
     reader.onload = () => setPreview(reader.result as string);
@@ -36,23 +40,6 @@ export default function Page() {
     setLoading(true);
     setOutput(null);
 
-    // Ice FX burst روی دکمه
-    const fxRoot = document.getElementById("iceFX-root");
-    if (fxRoot) {
-      const burst = document.createElement("div");
-      burst.className = "ice-burst";
-      fxRoot.appendChild(burst);
-
-      const ripple = document.createElement("div");
-      ripple.className = "shock-ripple";
-      fxRoot.appendChild(ripple);
-
-      setTimeout(() => {
-        burst.remove();
-        ripple.remove();
-      }, 1200);
-    }
-
     const formData = new FormData();
     formData.append("image", image);
 
@@ -61,11 +48,26 @@ export default function Page() {
       body: formData,
     });
 
+    if (!res.ok) {
+      console.error("Generate failed", await res.text());
+      setLoading(false);
+      return;
+    }
+
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-
     setOutput(url);
     setLoading(false);
+  }
+
+  function handleDownload() {
+    if (!output) return;
+    const link = document.createElement("a");
+    link.href = output;
+    link.download = "iceball-portrait.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -73,10 +75,12 @@ export default function Page() {
       <style jsx global>{`
         html,
         body {
-          overflow-x: hidden;
-          background: linear-gradient(180deg, #cfe9ff 0%, #eaf2ff 60%, #ffffff 100%);
+          padding: 0;
+          margin: 0;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display",
-            "IRANSans", "Vazirmatn", sans-serif;
+            "SF Pro Text", sans-serif;
+          background: radial-gradient(circle at top, #d6ecff 0%, #eaf2ff 35%, #ffffff 80%);
+          overflow-x: hidden;
         }
 
         body::before {
@@ -85,140 +89,190 @@ export default function Page() {
           inset: 0;
           background:
             url("/textures/noise.png") repeat,
-            radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 70%);
-          opacity: 0.35;
+            radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+            radial-gradient(circle at 80% 100%, rgba(180, 210, 255, 0.45), transparent 65%);
+          mix-blend-mode: screen;
+          opacity: 0.45;
           pointer-events: none;
-          z-index: 0;
+          z-index: -3;
         }
 
-        /* برف ریزون عمومی */
-        @keyframes snowFall {
-          0% {
-            transform: translateY(-10%);
-            opacity: 0.8;
-          }
-          100% {
-            transform: translateY(110vh);
-            opacity: 0.2;
-          }
+        /* Winter parallax layers */
+        .winter-layer {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: -2;
         }
 
+        .winter-layer.aurora {
+          background:
+            radial-gradient(circle at 10% 20%, rgba(140, 190, 255, 0.4), transparent 55%),
+            radial-gradient(circle at 80% 70%, rgba(190, 225, 255, 0.35), transparent 65%);
+          filter: blur(60px);
+          animation: auroraWave 18s ease-in-out infinite alternate;
+          opacity: 0.9;
+        }
+
+        .winter-layer.snowfield {
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1px);
+          background-size: 160px 160px;
+          animation: snowDrift 26s linear infinite;
+          opacity: 0.35;
+        }
+
+        /* Snowflakes */
         .snowflake {
           position: fixed;
-          top: -40px;
-          color: rgba(255, 255, 255, 0.9);
-          pointer-events: none;
-          animation-name: snowFall;
-          animation-timing-function: linear;
+          top: -5%;
+          color: rgba(255, 255, 255, 0.95);
+          text-shadow:
+            0 0 6px rgba(140, 190, 255, 0.8),
+            0 0 16px rgba(140, 190, 255, 0.9);
+          animation-name: snowFall, snowSway;
           animation-iteration-count: infinite;
-          text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
-          z-index: 1;
-        }
-
-        .snow-blur {
-          position: fixed;
-          width: 160px;
-          height: 160px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 60%);
-          filter: blur(12px);
-          opacity: 0.35;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        /* کارت یخی */
-        .frost-glass {
-          backdrop-filter: blur(28px);
-          background: rgba(255, 255, 255, 0.42);
-          border-radius: 28px;
-          border: 1px solid rgba(255, 255, 255, 0.6);
-          box-shadow:
-            inset 0 0 22px rgba(255, 255, 255, 0.5),
-            0 18px 40px rgba(80, 130, 190, 0.35);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .ice-halo {
-          position: absolute;
-          inset: -40px;
-          border-radius: 999px;
-          background: radial-gradient(circle, rgba(150, 210, 255, 0.55), transparent 70%);
-          filter: blur(40px);
+          animation-timing-function: linear;
           z-index: -1;
         }
 
-        .freeze-pulse {
-          animation: coldGlow 7s ease-in-out infinite;
+        @keyframes snowFall {
+          0% {
+            transform: translateY(-10vh);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(110vh);
+            opacity: 0;
+          }
         }
 
-        @keyframes coldGlow {
-          0%,
-          100% {
-            box-shadow:
-              inset 0 0 22px rgba(255, 255, 255, 0.5),
-              0 18px 40px rgba(80, 130, 190, 0.35);
+        @keyframes snowSway {
+          0% {
+            transform: translateX(0);
           }
           50% {
-            box-shadow:
-              inset 0 0 32px rgba(255, 255, 255, 0.8),
-              0 24px 60px rgba(120, 180, 255, 0.55);
+            transform: translateX(20px);
           }
+          100% {
+            transform: translateX(-10px);
+          }
+        }
+
+        /* Frost screen glow behind card */
+        .frost-screen {
+          position: absolute;
+          inset: -140px;
+          border-radius: 40px;
+          background:
+            radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.8), transparent 60%),
+            radial-gradient(circle at 100% 100%, rgba(160, 205, 255, 0.6), transparent 60%);
+          filter: blur(45px);
+          opacity: 0.8;
+          z-index: -1;
+        }
+
+        .frost-glass {
+          backdrop-filter: blur(30px);
+          background: rgba(255, 255, 255, 0.38);
+          border-radius: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow:
+            0 24px 60px rgba(70, 120, 170, 0.45),
+            inset 0 0 30px rgba(255, 255, 255, 0.25);
+        }
+
+        .card-float {
+          animation: floatCard 6s ease-in-out infinite;
+          transform-origin: center;
         }
 
         @keyframes floatCard {
-          0%,
-          100% {
-            transform: translateY(0px);
+          0% {
+            transform: translateY(0) rotateX(0deg) rotateY(0deg);
           }
           50% {
-            transform: translateY(-6px);
+            transform: translateY(-6px) rotateX(1.5deg) rotateY(-1.5deg);
+          }
+          100% {
+            transform: translateY(0) rotateX(0deg) rotateY(0deg);
           }
         }
 
-        /* حاشیه ترک یخ روی کارت */
-        .ice-crack-border {
-          position: absolute;
-          inset: 0;
-          border-radius: inherit;
-          pointer-events: none;
-          background-image: url("/textures/ice-cracks.png");
-          background-size: cover;
-          background-repeat: no-repeat;
-          mix-blend-mode: screen;
-          opacity: 0.4;
-        }
-
-        /* ناحیه دراپزون + پریویو */
         .upload-zone {
-          transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+          border-radius: 18px;
+          border: 1px dashed rgba(255, 255, 255, 0.75);
+          background: linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.35),
+            rgba(230, 242, 255, 0.7)
+          );
+          box-shadow:
+            inset 0 0 18px rgba(255, 255, 255, 0.7),
+            0 18px 35px rgba(135, 180, 235, 0.3);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .upload-zone:hover {
           transform: translateY(-2px);
-          box-shadow: 0 0 26px rgba(150, 200, 255, 0.4);
-          background: rgba(255, 255, 255, 0.9);
+          box-shadow:
+            inset 0 0 22px rgba(255, 255, 255, 0.9),
+            0 22px 40px rgba(135, 190, 245, 0.4);
         }
 
         .preview-frame {
-          border-radius: 18px;
+          position: relative;
+          border-radius: 22px;
           padding: 4px;
+          margin-top: 1.5rem;
           background: linear-gradient(
-            135deg,
-            rgba(180, 220, 255, 0.7),
-            rgba(255, 255, 255, 0.9)
+            145deg,
+            rgba(255, 255, 255, 0.9),
+            rgba(180, 210, 255, 0.7)
           );
           box-shadow:
-            inset 0 0 18px rgba(255, 255, 255, 0.7),
-            0 16px 40px rgba(90, 140, 200, 0.45);
+            0 18px 40px rgba(110, 160, 220, 0.45),
+            inset 0 0 22px rgba(255, 255, 255, 0.7);
+          overflow: hidden;
           animation: frostIn 0.4s ease-out forwards;
+        }
+
+        .preview-frame img {
+          display: block;
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 18px;
+        }
+
+        .result-frame {
+          margin-top: 1.75rem;
+          border-radius: 22px;
+          padding: 4px;
+          background: linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.9),
+            rgba(160, 210, 255, 0.75)
+          );
+          box-shadow:
+            0 20px 48px rgba(90, 145, 215, 0.5),
+            inset 0 0 26px rgba(255, 255, 255, 0.8);
+        }
+
+        .result-frame img {
+          display: block;
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 18px;
         }
 
         @keyframes frostIn {
           0% {
             opacity: 0;
-            transform: translateY(8px) scale(0.96);
+            transform: translateY(10px) scale(0.96);
           }
           100% {
             opacity: 1;
@@ -226,398 +280,271 @@ export default function Page() {
           }
         }
 
-        /* دکمه یخی */
-        .ice-button-wrap {
+        .primary-btn {
           position: relative;
-          overflow: visible;
-        }
-
-        .generate-button {
-          background: linear-gradient(135deg, #0a3d62, #1e90ff);
-          border-radius: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.6);
-          box-shadow: 0 10px 32px rgba(40, 120, 255, 0.55);
-          padding: 1rem;
-          position: relative;
+          width: 100%;
+          border-radius: 999px;
+          padding: 0.95rem 1.2rem;
+          border: 1px solid rgba(255, 255, 255, 0.7);
+          background: linear-gradient(135deg, #0f4780, #1e8dff);
+          color: #ffffff;
+          font-weight: 650;
+          font-size: 0.95rem;
+          letter-spacing: 0.4px;
+          box-shadow:
+            0 14px 35px rgba(30, 120, 255, 0.6),
+            0 0 22px rgba(140, 200, 255, 0.75);
+          cursor: pointer;
           overflow: hidden;
-          transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
         }
 
-        .generate-button:hover {
+        .primary-btn:hover:enabled {
           transform: translateY(-2px);
-          box-shadow: 0 14px 40px rgba(60, 150, 255, 0.7);
-          background: linear-gradient(135deg, #0b4875, #2f9bff);
+          box-shadow:
+            0 18px 45px rgba(40, 135, 255, 0.7),
+            0 0 26px rgba(155, 210, 255, 0.9);
         }
 
-        .generate-button:active {
-          transform: translateY(0px) scale(0.97);
-          box-shadow: 0 6px 24px rgba(40, 120, 255, 0.55);
+        .primary-btn:active:enabled {
+          transform: translateY(1px) scale(0.98);
+          box-shadow:
+            0 8px 22px rgba(20, 100, 210, 0.7),
+            0 0 16px rgba(130, 190, 255, 0.8);
         }
 
-        .ice-button-refraction {
+        .primary-btn:disabled {
+          opacity: 0.7;
+          cursor: default;
+          box-shadow:
+            0 10px 28px rgba(120, 160, 210, 0.5),
+            0 0 12px rgba(160, 200, 245, 0.7);
+        }
+
+        .btn-shimmer {
           position: absolute;
-          inset: -2px;
-          border-radius: inherit;
+          inset: 0;
           pointer-events: none;
           background: linear-gradient(
             120deg,
-            rgba(255, 255, 255, 0.7),
-            rgba(255, 255, 255, 0)
+            transparent 0%,
+            rgba(255, 255, 255, 0.75) 45%,
+            transparent 80%
           );
-          opacity: 0.0;
+          transform: translateX(-120%);
+          animation: shimmer 3.2s ease-in-out infinite;
           mix-blend-mode: screen;
-          animation: refractionSweep 4s ease-in-out infinite;
         }
 
-        @keyframes refractionSweep {
+        .download-btn {
+          margin-top: 0.85rem;
+          width: 100%;
+          border-radius: 999px;
+          padding: 0.8rem 1rem;
+          border: 1px solid rgba(15, 71, 128, 0.24);
+          background: rgba(255, 255, 255, 0.9);
+          color: #123a63;
+          font-weight: 600;
+          font-size: 0.88rem;
+          letter-spacing: 0.2px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          box-shadow: 0 10px 26px rgba(100, 150, 210, 0.35);
+          cursor: pointer;
+          transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .download-btn:hover {
+          transform: translateY(-1px);
+          background: rgba(255, 255, 255, 0.98);
+          box-shadow: 0 14px 30px rgba(110, 160, 220, 0.5);
+        }
+
+        .download-btn:active {
+          transform: translateY(1px) scale(0.98);
+          box-shadow: 0 8px 20px rgba(90, 140, 205, 0.5);
+        }
+
+        footer {
+          opacity: 0.75;
+          font-size: 0.7rem;
+          letter-spacing: 0.4px;
+          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+        }
+
+        @keyframes shimmer {
           0% {
-            opacity: 0;
             transform: translateX(-130%);
-          }
-          40% {
-            opacity: 0.85;
-            transform: translateX(0%);
-          }
-          100% {
             opacity: 0;
-            transform: translateX(130%);
           }
-        }
-
-        /* بک‌گراند پارالاکس و آئورا */
-        .winter-bg-layer {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          z-index: -5;
-        }
-
-        .winter-bg-layer.snow-parallax {
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
-          background-size: 150px 150px;
-          animation: snowParallax 22s linear infinite;
-          opacity: 0.5;
-        }
-
-        .winter-bg-layer.aurora {
-          background:
-            radial-gradient(circle at 20% 30%, rgba(120, 180, 255, 0.35), transparent 60%),
-            radial-gradient(circle at 80% 75%, rgba(170, 210, 255, 0.45), transparent 70%);
-          filter: blur(80px);
-          animation: auroraWave 16s ease-in-out infinite alternate;
-          opacity: 0.65;
-        }
-
-        @keyframes snowParallax {
-          0% {
-            transform: translateY(-20px);
+          30% {
+            opacity: 1;
+          }
+          60% {
+            transform: translateX(0%);
+            opacity: 1;
           }
           100% {
-            transform: translateY(60px);
+            transform: translateX(130%);
+            opacity: 0;
           }
         }
 
         @keyframes auroraWave {
           0% {
-            transform: translateX(-40px) scale(1.03);
-          }
-          100% {
-            transform: translateX(40px) scale(1.12);
-          }
-        }
-
-        /* لایه‌های فروست سراسری */
-        .frost-screen {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          background:
-            url("/textures/frost-texture.png") repeat,
-            radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25), transparent 60%),
-            radial-gradient(circle at 70% 80%, rgba(180, 220, 255, 0.2), transparent 70%);
-          opacity: 0.55;
-          filter: blur(1.6px);
-          mix-blend-mode: screen;
-          animation: frostPulse 6s ease-in-out infinite;
-          z-index: -4;
-        }
-
-        @keyframes frostPulse {
-          0%,
-          100% {
-            opacity: 0.45;
-            filter: blur(1.4px);
+            transform: translate3d(-10px, 0, 0) skewX(-3deg);
           }
           50% {
-            opacity: 0.8;
-            filter: blur(2.6px);
+            transform: translate3d(6px, -8px, 0) skewX(1deg);
+          }
+          100% {
+            transform: translate3d(-4px, 6px, 0) skewX(-2deg);
           }
         }
 
-        .frost-growth {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          background-image: url("/textures/frost-growth.png");
-          background-size: cover;
-          opacity: 0;
-          z-index: -3;
-          animation: frostGrow 11s ease-out forwards;
-        }
-
-        @keyframes frostGrow {
+        @keyframes snowDrift {
           0% {
-            opacity: 0;
-            transform: scale(1.08);
-            filter: blur(8px);
-          }
-          40% {
-            opacity: 0.4;
-            transform: scale(1.02);
-            filter: blur(5px);
+            transform: translate3d(0, -15px, 0);
           }
           100% {
-            opacity: 0.78;
-            transform: scale(1);
-            filter: blur(2px);
+            transform: translate3d(0, 15px, 0);
           }
-        }
-
-        .frost-cracks {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          background-image: url("/textures/ice-cracks-strong.png");
-          background-size: contain;
-          background-repeat: repeat;
-          mix-blend-mode: lighten;
-          opacity: 0.22;
-          animation: frostCrackShimmer 8s ease-in-out infinite;
-          z-index: -2;
-        }
-
-        @keyframes frostCrackShimmer {
-          0%,
-          100% {
-            opacity: 0.22;
-          }
-          50% {
-            opacity: 0.34;
-          }
-        }
-
-        /* افکت کلیک دکمه: انفجار یخ + شاک‌ویو */
-        .ice-burst {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          background: radial-gradient(
-            circle,
-            rgba(180, 220, 255, 0.55),
-            rgba(140, 180, 255, 0.15),
-            transparent 70%
-          );
-          mix-blend-mode: screen;
-          opacity: 0;
-          transform: scale(0.3);
-          animation: iceBurstAnim 0.9s ease-out forwards;
-        }
-
-        @keyframes iceBurstAnim {
-          0% {
-            opacity: 0.9;
-            transform: scale(0.3);
-            filter: blur(2px);
-          }
-          40% {
-            opacity: 0.7;
-            transform: scale(1.2);
-            filter: blur(4px);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(2.3);
-            filter: blur(8px);
-          }
-        }
-
-        .shock-ripple {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          border: 2px solid rgba(200, 230, 255, 0.5);
-          opacity: 0;
-          pointer-events: none;
-          animation: shockRippleAnim 1.2s ease-out forwards;
-        }
-
-        @keyframes shockRippleAnim {
-          0% {
-            opacity: 0.95;
-            transform: scale(0.4);
-          }
-          60% {
-            opacity: 0.3;
-            transform: scale(2.2);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(3.2);
-          }
-        }
-
-        footer {
-          opacity: 0.7;
-          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
         }
       `}</style>
 
-      <main
-        dir="rtl"
-        className="min-h-screen flex items-center justify-center overflow-hidden px-4 relative"
-      >
-        {/* لایه‌های بک‌گراند */}
-        <div className="winter-bg-layer snow-parallax" />
-        <div className="winter-bg-layer aurora" />
-        <div className="frost-screen" />
-        <div className="frost-growth" />
-        <div className="frost-cracks" />
-
-        {/* برف ریزون رندوم */}
-        {Array.from({ length: 32 }).map((_, idx) => (
-          <div
-            key={`flake-${idx}`}
-            className="snowflake"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDuration: `${10 + Math.random() * 10}s`,
-              animationDelay: `${Math.random() * 8}s`,
-              fontSize: `${10 + Math.random() * 10}px`,
-            }}
-          >
-            ❄
-          </div>
-        ))}
-
-        {/* هاله‌های بلور */}
-        <div className="snow-blur" style={{ top: "10%", left: "18%" }} />
-        <div className="snow-blur" style={{ bottom: "12%", left: "24%" }} />
-        <div className="snow-blur" style={{ top: "28%", right: "16%" }} />
-        <div className="snow-blur" style={{ bottom: "26%", right: "22%" }} />
-
-        {/* کارت اصلی */}
+      {/* Winter background layers */}
+      <div className="winter-layer aurora" />
+      <div className="winter-layer snowfield" />
+      {Array.from({ length: 32 }).map((_, i) => (
         <div
-          className="mx-auto px-6 py-10 relative frost-glass freeze-pulse"
+          key={`flake-${i}`}
+          className="snowflake"
           style={{
-            maxWidth: "480px",
-            animation: "floatCard 6s ease-in-out infinite",
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${10 + Math.random() * 10}s, ${6 + Math.random() * 6
+              }s`,
+            animationDelay: `${Math.random() * 8}s, ${Math.random() * 5}s`,
+            fontSize: `${10 + Math.random() * 10}px`,
           }}
         >
-          <div className="ice-halo" />
-          <div className="ice-crack-border" />
-          <div id="iceFX-root" className="pointer-events-none absolute inset-0" />
+          ❄
+        </div>
+      ))}
 
-          <header className="text-center space-y-3 mb-6 relative z-10 flex flex-col items-center">
+      <main
+        dir="rtl"
+        className="min-h-screen flex items-center justify-center px-4 py-10"
+      >
+        <div
+          className="relative w-full max-w-md frost-glass card-float"
+          style={{
+            padding: "2.2rem 1.9rem 1.6rem",
+          }}
+        >
+          <div className="frost-screen" />
+
+          {/* Logo */}
+          <div className="w-full flex justify-center mb-4">
             <img
               src="/iceball_logo.png"
-              alt="IceBall Logo"
-              style={{ width: "82px", height: "82px", marginBottom: "8px" }}
+              alt="IceBall logo"
+              style={{
+                width: "140px",
+                maxWidth: "50%",
+                height: "auto",
+                objectFit: "contain",
+              }}
             />
-            <h1 className="text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.04em" }}>
+          </div>
+
+          {/* Header */}
+          <header className="text-center mb-4">
+            <h1
+              className="text-3xl font-bold"
+              style={{
+                fontWeight: 800,
+                letterSpacing: "-0.06em",
+                color: "#102540",
+              }}
+            >
               آماده‌ای یخ بزنی؟
             </h1>
-            <p className="text-sm text-gray-700" style={{ fontWeight: 300 }}>
+            <p
+              className="mt-2 text-sm text-gray-700"
+              style={{ fontWeight: 300 }}
+            >
               عکست رو بده؛ من سردترین حالتت رو می‌سازم ❄
             </p>
           </header>
 
-          <div className="relative z-10 space-y-4">
-            <label
-              className="block text-center cursor-pointer upload-zone"
-              style={{
-                border: "1px dashed rgba(180,200,230,0.9)",
-                borderRadius: "18px",
-                background: "rgba(255,255,255,0.88)",
-                padding: "1.5rem",
-              }}
+          {/* Upload box */}
+          <label className="block cursor-pointer upload-zone px-4 py-5 text-center">
+            <p
+              className="text-gray-800 mb-1"
+              style={{ fontWeight: 600, fontSize: "0.95rem" }}
             >
-              <p className="font-semibold text-gray-800 mb-1">عکست رو آپلود کن</p>
-              <p className="text-xs text-gray-500">(فرمت JPG یا PNG)</p>
-              <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-            </label>
+              عکست رو برام بفرست
+            </p>
+            <p
+              className="text-xs text-gray-600"
+              style={{ fontWeight: 300, opacity: 0.9 }}
+            >
+              (فرمت PNG یا JPG، نور معمولی، صورت واضح)
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleUpload}
+            />
+          </label>
 
-            {preview && (
-              <div className="preview-frame mt-2">
-                <img
-                  src={preview}
-                  alt="preview"
-                  style={{
-                    width: "100%",
-                    maxHeight: "420px",
-                    objectFit: "cover",
-                    borderRadius: "14px",
-                    display: "block",
-                  }}
-                />
-              </div>
-            )}
-
-            <div className="ice-button-wrap mt-4">
-              <button
-                onClick={handleGenerate}
-                disabled={!image || loading}
-                className="generate-button w-full text-white font-semibold"
-              >
-                {loading ? "در حال ساخت..." : "بزن که یخ بزنی ❄"}
-              </button>
-              <div className="ice-button-refraction" />
+          {/* Preview */}
+          {preview && (
+            <div className="preview-frame mt-6">
+              <img src={preview} alt="preview" />
             </div>
+          )}
 
-            {output && (
-              <div className="preview-frame mt-5">
-                <img
-                  src={output}
-                  alt="generated portrait"
-                  style={{
-                    width: "100%",
-                    maxHeight: "420px",
-                    objectFit: "cover",
-                    borderRadius: "14px",
-                    display: "block",
-                  }}
-                />
-              </div>
-            )}
-            {output && (
-              <div className="mt-4 flex justify-center">
-                <a
-                  href={output}
-                  download="iceball-winter-portrait.png"
-                  className="px-5 py-3 rounded-xl text-white font-semibold"
-                  style={{
-                    background: "linear-gradient(135deg, #1e90ff, #0a3d62)",
-                    boxShadow: "0 10px 30px rgba(40,120,255,0.45)",
-                    border: "1px solid rgba(255,255,255,0.6)",
-                    transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-3px)";
-                    e.currentTarget.style.boxShadow = "0 14px 40px rgba(60,150,255,0.7)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0px)";
-                    e.currentTarget.style.boxShadow = "0 10px 30px rgba(40,120,255,0.45)";
-                  }}
-                >
-                  دانلود تصویر ❄
-                </a>
-              </div>
-            )}
+          {/* Generate button */}
+          <div className="mt-6">
+            <button
+              onClick={handleGenerate}
+              disabled={!image || loading}
+              className="primary-btn"
+            >
+              {loading ? "در حال ساخت پرتره زمستونی..." : "بزن که یخ بزنی"}
+              <span className="btn-shimmer" />
+            </button>
 
-            <footer className="text-center text-xs text-gray-600 mt-4">
-              @Luxirana — تگمون کن ❄
-            </footer>
+            {/* Download button – only when output exists */}
+            {output && (
+              <button
+                type="button"
+                className="download-btn"
+                onClick={handleDownload}
+              >
+                <span>دانلود تصویر نهایی</span>
+                <span style={{ fontSize: "1.1rem" }}>⬇️</span>
+              </button>
+            )}
           </div>
+
+          {/* Result */}
+          {output && (
+            <div className="result-frame mt-6">
+              <img src={output} alt="generated portrait" />
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="mt-5 text-center text-gray-700">
+            <span style={{ fontWeight: 300 }}>تگمون کن </span>
+            <span style={{ fontWeight: 600 }}>@Iceball_ir</span>
+            <span style={{ marginLeft: 4 }}>❄</span>
+          </footer>
         </div>
       </main>
     </>
