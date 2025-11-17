@@ -86,6 +86,90 @@ export default function Page() {
     a.remove();
   }
 
+  // اسکرول و اوپاسیتی اولیه
+  useEffect(() => {
+    document.body.style.overflowY = "auto";
+  }, []);
+
+  // ❄ Canvas Snow Engine
+  useEffect(() => {
+    const canvas = document.getElementById("snow-canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing to device pixel ratio
+    }
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    type Flake = {
+      x: number;
+      y: number;
+      r: number;
+      vy: number;
+      vx: number;
+      alpha: number;
+    };
+
+    function makeFlake(): Flake {
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 1 + Math.random() * 2.8,
+        vy: 0.6 + Math.random() * 1.4,
+        vx: -0.4 + Math.random() * 0.8,
+        alpha: 0.4 + Math.random() * 0.6,
+      };
+    }
+
+    const flakes: Flake[] = Array.from({ length: 140 }, () => makeFlake());
+    let frameId: number;
+
+    function render() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (const f of flakes) {
+        f.y += f.vy;
+        f.x += f.vx + Math.sin(f.y / 60) * 0.4; // کمی انحنا شبیه باد
+
+        if (f.y > height + 12) {
+          f.y = -12;
+          f.x = Math.random() * width;
+        }
+        if (f.x > width + 12) f.x = -12;
+        if (f.x < -12) f.x = width + 12;
+
+        ctx.globalAlpha = f.alpha;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      frameId = requestAnimationFrame(render);
+    }
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(frameId);
+    };
+  }, []);
+
   return (
     <>
       <style jsx global>{`
@@ -97,7 +181,6 @@ export default function Page() {
             "Segoe UI", sans-serif;
           background: radial-gradient(circle at top, #d6ecff 0%, #eaf2ff 35%, #ffffff 80%);
           scroll-behavior: smooth;
-          overflow-x: hidden;
         }
 
         body::before {
@@ -186,54 +269,22 @@ export default function Page() {
           }
         }
 
-        /* Snowflakes */
-        .snowflake {
-          position: fixed;
-          top: -5%;
-          color: rgba(255, 255, 255, 0.96);
-          text-shadow:
-            0 0 6px rgba(140, 190, 255, 0.9),
-            0 0 14px rgba(140, 190, 255, 1);
-          animation-name: snowFall, snowSway;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear;
-          z-index: 5;
-        }
-
-        @keyframes snowFall {
-          0% {
-            transform: translateY(-10vh);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(110vh);
-            opacity: 0;
-          }
-        }
-
-        @keyframes snowSway {
-          0% {
-            transform: translateX(0);
-          }
-          50% {
-            transform: translateX(18px);
-          }
-          100% {
-            transform: translateX(-10px);
-          }
-        }
-
-        .snow-container {
+        /* Canvas Snow */
+        .snow-canvas {
           position: fixed;
           inset: 0;
-          z-index: 9999;
           pointer-events: none;
+          z-index: 9999;
         }
 
-        /* ICE reveal (بدون ماسک خراب‌کننده) */
+        .frost-glass,
+        .result-frame,
+        .preview-frame {
+          position: relative;
+          z-index: 10;
+        }
+
+        /* ICE reveal */
         .ice-reveal {
           position: relative;
           overflow: hidden;
@@ -431,23 +482,8 @@ export default function Page() {
       {/* Background layers */}
       <div className="winter-layer aurora" />
       <div className="winter-layer snowfield" />
-
-      {/* Snow container – ensures snow renders above all layers */}
-      <div className="snow-container">
-        {Array.from({ length: 32 }).map((_, i) => (
-          <div
-            key={i}
-            className="snowflake"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDuration: `${11 + Math.random() * 10}s, ${6 + Math.random() * 5}s`,
-              fontSize: `${10 + Math.random() * 14}px`,
-            }}
-          >
-            ❄
-          </div>
-        ))}
-      </div>
+      {/* Canvas Snow */}
+      <canvas id="snow-canvas" className="snow-canvas" />
 
       <main
         dir="rtl"
@@ -542,7 +578,7 @@ export default function Page() {
           {/* FOOTER */}
           <footer className="mt-5 text-center text-gray-700">
             <span style={{ fontWeight: 300 }}>تگمون کن </span>
-            <span style={{ fontWeight: 600 }}>@Iceball_ir</span>
+            <span style={{ fontWeight: 600 }}>Iceball_ir@</span>
             <span> ❄</span>
           </footer>
         </div>
