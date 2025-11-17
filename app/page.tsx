@@ -106,9 +106,13 @@ export default function Page() {
     function resize() {
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing to device pixel ratio
+      if (canvas) {
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+      }
+      if (ctx) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing to device pixel ratio
+      }
     }
 
     resize();
