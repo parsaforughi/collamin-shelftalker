@@ -1027,7 +1027,7 @@ export default function Page() {
           position: fixed;
           inset: 0;
           pointer-events: none;
-          z-index: 50;
+          z-index: 101;
           overflow: hidden;
         }
 
@@ -1042,7 +1042,7 @@ export default function Page() {
           cursor: grab;
           user-select: none;
           transform-origin: center;
-          z-index: 51;
+          z-index: 102;
           touch-action: none;
           will-change: transform;
         }
