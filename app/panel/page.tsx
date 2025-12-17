@@ -51,10 +51,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#e9f6ff] pb-32 flex flex-col items-center pt-10">
 
-      {/* IceBall logo fixed */}
+      {/* Collamin logo fixed */}
       <img
-        src="/iceball_logo.png"
-        alt="IceBall"
+        src="/collamin_logo.png"
+        alt="Collamin"
         className="w-[180px] max-w-[70%] object-contain mb-6"
         style={{ marginTop: "-10px" }}
       />
@@ -115,7 +115,7 @@ export default function Home() {
 
       {/* Footer tag */}
       <p className="mt-16 text-gray-600 text-sm">
-        ساخته شده برای <span className="font-semibold">@Iceball_ir</span>
+        ساخته شده برای <span className="font-semibold">collamin.iran</span>
       </p>
 
       <p className="text-gray-400 text-xs mt-1 mb-20">

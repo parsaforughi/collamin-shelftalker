@@ -80,10 +80,36 @@ export default function Page() {
     if (!output) return;
     const a = document.createElement("a");
     a.href = output;
-    a.download = "iceball-portrait.png";
+    a.download = "collamin-portrait.png";
     document.body.appendChild(a);
     a.click();
     a.remove();
+  }
+
+  async function handleShareToInstagram() {
+    if (!output) return;
+
+    try {
+      // Convert blob URL to File
+      const response = await fetch(output);
+      const blob = await response.blob();
+      const file = new File([blob], "collamin-portrait.png", { type: "image/png" });
+
+      // Check if Web Share API is available
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Collamin Portrait",
+        });
+      } else {
+        // Fallback: Try to open Instagram app directly
+        window.location.href = "instagram://story-camera";
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+      // Fallback: Open Instagram app
+      window.location.href = "instagram://story-camera";
+    }
   }
 
   // اسکرول و اوپاسیتی اولیه
@@ -91,89 +117,89 @@ export default function Page() {
     document.body.style.overflowY = "auto";
   }, []);
 
-  // ❄ Canvas Snow Engine
-  useEffect(() => {
-    const canvas = document.getElementById("snow-canvas") as HTMLCanvasElement | null;
-    if (!canvas) return;
+  // ❄ Canvas Snow Engine - DISABLED
+  // useEffect(() => {
+  //   const canvas = document.getElementById("snow-canvas") as HTMLCanvasElement | null;
+  //   if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  //   const ctx = canvas.getContext("2d");
+  //   if (!ctx) return;
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    const dpr = window.devicePixelRatio || 1;
+  //   let width = window.innerWidth;
+  //   let height = window.innerHeight;
+  //   const dpr = window.devicePixelRatio || 1;
 
-    function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      if (canvas) {
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-      }
-      if (ctx) {
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing to device pixel ratio
-      }
-    }
+  //   function resize() {
+  //     width = window.innerWidth;
+  //     height = window.innerHeight;
+  //     if (canvas) {
+  //       canvas.width = width * dpr;
+  //       canvas.height = height * dpr;
+  //     }
+  //     if (ctx) {
+  //       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing to device pixel ratio
+  //     }
+  //   }
 
-    resize();
-    window.addEventListener("resize", resize);
+  //   resize();
+  //   window.addEventListener("resize", resize);
 
-    type Flake = {
-      x: number;
-      y: number;
-      r: number;
-      vy: number;
-      vx: number;
-      alpha: number;
-    };
+  //   type Flake = {
+  //     x: number;
+  //     y: number;
+  //     r: number;
+  //     vy: number;
+  //     vx: number;
+  //     alpha: number;
+  //   };
 
-    function makeFlake(): Flake {
-      return {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: 1 + Math.random() * 2.8,
-        vy: 0.6 + Math.random() * 1.4,
-        vx: -0.4 + Math.random() * 0.8,
-        alpha: 0.4 + Math.random() * 0.6,
-      };
-    }
+  //   function makeFlake(): Flake {
+  //     return {
+  //       x: Math.random() * width,
+  //       y: Math.random() * height,
+  //       r: 1 + Math.random() * 2.8,
+  //       vy: 0.6 + Math.random() * 1.4,
+  //       vx: -0.4 + Math.random() * 0.8,
+  //       alpha: 0.4 + Math.random() * 0.6,
+  //     };
+  //   }
 
-    const flakes: Flake[] = Array.from({ length: 140 }, () => makeFlake());
-    let frameId: number;
+  //   const flakes: Flake[] = Array.from({ length: 140 }, () => makeFlake());
+  //   let frameId: number;
 
-    function render() {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, width, height);
+  //   function render() {
+  //     if (!ctx) return;
+  //     ctx.clearRect(0, 0, width, height);
 
-      for (const f of flakes) {
-        f.y += f.vy;
-        f.x += f.vx + Math.sin(f.y / 60) * 0.4; // کمی انحنا شبیه باد
+  //     for (const f of flakes) {
+  //       f.y += f.vy;
+  //       f.x += f.vx + Math.sin(f.y / 60) * 0.4; // کمی انحنا شبیه باد
 
-        if (f.y > height + 12) {
-          f.y = -12;
-          f.x = Math.random() * width;
-        }
-        if (f.x > width + 12) f.x = -12;
-        if (f.x < -12) f.x = width + 12;
+  //       if (f.y > height + 12) {
+  //         f.y = -12;
+  //         f.x = Math.random() * width;
+  //       }
+  //       if (f.x > width + 12) f.x = -12;
+  //       if (f.x < -12) f.x = width + 12;
 
-        ctx.globalAlpha = f.alpha;
-        ctx.beginPath();
-        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-      }
+  //       ctx.globalAlpha = f.alpha;
+  //       ctx.beginPath();
+  //       ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+  //       ctx.fillStyle = "#ffffff";
+  //       ctx.fill();
+  //     }
 
-      ctx.globalAlpha = 1;
-      frameId = requestAnimationFrame(render);
-    }
+  //     ctx.globalAlpha = 1;
+  //     frameId = requestAnimationFrame(render);
+  //   }
 
-    render();
+  //   render();
 
-    return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(frameId);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("resize", resize);
+  //     cancelAnimationFrame(frameId);
+  //   };
+  // }, []);
 
   return (
     <>
@@ -184,8 +210,12 @@ export default function Page() {
           margin: 0;
           font-family: "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont,
             "Segoe UI", sans-serif;
-          background: radial-gradient(circle at top, #d6ecff 0%, #eaf2ff 35%, #ffffff 80%);
+          background: #aeddd7 !important;
           scroll-behavior: smooth;
+        }
+        
+        html {
+          background: #aeddd7 !important;
         }
 
         body::before {
@@ -193,24 +223,24 @@ export default function Page() {
           position: fixed;
           inset: 0;
           background:
-            radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
-            radial-gradient(circle at 80% 100%, rgba(180, 210, 255, 0.45), transparent 65%);
-          mix-blend-mode: screen;
-          opacity: 0.5;
+            radial-gradient(circle at 20% 0%, rgba(174, 221, 215, 0.8), transparent 60%),
+            radial-gradient(circle at 80% 100%, rgba(150, 210, 200, 0.6), transparent 65%);
+          mix-blend-mode: normal;
+          opacity: 0.7;
           pointer-events: none;
           z-index: -3;
         }
 
         /* Frost glass card */
         .frost-glass {
-          background: rgba(255, 255, 255, 0.38);
+          background: #f4e2d8;
           border-radius: 24px;
           backdrop-filter: blur(22px) saturate(150%);
           -webkit-backdrop-filter: blur(22px) saturate(150%);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(20, 178, 170, 0.2);
           box-shadow:
-            0 18px 45px rgba(0, 50, 110, 0.18),
-            0 6px 18px rgba(0, 40, 90, 0.12);
+            0 18px 45px rgba(20, 178, 170, 0.15),
+            0 6px 18px rgba(20, 178, 170, 0.1);
         }
 
         .card-float {
@@ -239,18 +269,18 @@ export default function Page() {
 
         .winter-layer.aurora {
           background:
-            radial-gradient(circle at 10% 20%, rgba(140, 190, 255, 0.45), transparent 55%),
-            radial-gradient(circle at 80% 70%, rgba(190, 225, 255, 0.4), transparent 65%);
+            radial-gradient(circle at 10% 20%, rgba(20, 178, 170, 0.15), transparent 55%),
+            radial-gradient(circle at 80% 70%, rgba(23, 162, 184, 0.12), transparent 65%);
           filter: blur(60px);
           animation: auroraWave 17s ease-in-out infinite alternate;
-          opacity: 0.9;
+          opacity: 0.6;
         }
 
         .winter-layer.snowfield {
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1px);
+          background: radial-gradient(circle, rgba(20, 178, 170, 0.05) 1px, transparent 1px);
           background-size: 160px 160px;
           animation: snowDrift 25s linear infinite;
-          opacity: 0.35;
+          opacity: 0.2;
         }
 
         @keyframes auroraWave {
@@ -297,8 +327,8 @@ export default function Page() {
           animation: crackReveal 1.1s ease-out forwards;
           box-shadow:
             inset 0 0 20px rgba(255, 255, 255, 0.8),
-            0 14px 30px rgba(60, 120, 190, 0.35);
-          background: radial-gradient(circle at top, rgba(255, 255, 255, 0.95), #e4f1ff);
+            0 14px 30px rgba(20, 178, 170, 0.25);
+          background: radial-gradient(circle at top, rgba(255, 255, 255, 0.95), #f0f8f8);
         }
 
         .ice-reveal img {
@@ -329,9 +359,9 @@ export default function Page() {
         /* Upload zone */
         .upload-zone {
           border-radius: 18px;
-          border: 1px dashed rgba(150, 190, 230, 0.9);
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: inset 0 0 14px rgba(230, 240, 255, 0.9);
+          border: 1px dashed rgba(20, 178, 170, 0.5);
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: inset 0 0 14px rgba(20, 178, 170, 0.1);
           transition:
             box-shadow 0.25s ease,
             transform 0.2s ease,
@@ -339,28 +369,28 @@ export default function Page() {
         }
 
         .upload-zone:hover {
-          border-color: rgba(40, 120, 255, 0.9);
+          border-color: rgba(20, 178, 170, 0.8);
           box-shadow:
-            inset 0 0 18px rgba(230, 240, 255, 1),
-            0 8px 22px rgba(60, 130, 220, 0.2);
+            inset 0 0 18px rgba(20, 178, 170, 0.15),
+            0 8px 22px rgba(23, 162, 184, 0.2);
           transform: translateY(-2px);
         }
 
         .preview-frame {
           border-radius: 20px;
           padding: 0.3rem;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(210, 230, 255, 0.9));
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 250, 0.95));
           box-shadow:
-            0 12px 26px rgba(80, 130, 200, 0.35),
+            0 12px 26px rgba(20, 178, 170, 0.25),
             inset 0 0 18px rgba(255, 255, 255, 0.9);
         }
 
         .result-frame {
           border-radius: 20px;
           padding: 0.3rem;
-          background: linear-gradient(135deg, rgba(230, 245, 255, 0.98), rgba(205, 230, 255, 0.98));
+          background: linear-gradient(135deg, rgba(245, 252, 252, 0.98), rgba(240, 250, 250, 0.98));
           box-shadow:
-            0 16px 32px rgba(40, 100, 190, 0.45),
+            0 16px 32px rgba(20, 178, 170, 0.3),
             inset 0 0 20px rgba(255, 255, 255, 0.95);
         }
 
@@ -377,14 +407,14 @@ export default function Page() {
           width: 100%;
           border-radius: 999px;
           padding: 0.95rem;
-          background: linear-gradient(135deg, #0f4780, #1e8dff);
-          color: white;
+          background: #3c8e7c;
+          color: #ffffff;
           font-weight: 650;
           position: relative;
           overflow: hidden;
           box-shadow:
-            0 14px 35px rgba(30, 120, 255, 0.6),
-            0 0 20px rgba(140, 200, 255, 0.7);
+            0 14px 35px rgba(60, 142, 124, 0.5),
+            0 0 20px rgba(60, 142, 124, 0.4);
           border: none;
         }
 
@@ -427,68 +457,88 @@ export default function Page() {
 
         .download-btn {
           width: 100%;
-          margin-top: 0.85rem;
-          padding: 0.95rem;
           border-radius: 999px;
-          background: linear-gradient(135deg, #ffffff, #e8f3ff);
-          font-weight: 700;
-          color: #0d294a;
-          border: 1px solid rgba(100, 140, 200, 0.32);
-          box-shadow:
-            0 12px 28px rgba(40, 120, 200, 0.28),
-            0 0 18px rgba(180, 215, 255, 0.8);
+          padding: 0.95rem;
+          background: rgba(60, 142, 124, 0.85);
+          backdrop-filter: blur(22px) saturate(150%);
+          -webkit-backdrop-filter: blur(22px) saturate(150%);
+          color: #ffffff;
+          font-weight: 650;
           position: relative;
           overflow: hidden;
+          box-shadow:
+            inset 0 0 14px rgba(255, 255, 255, 0.2),
+            0 14px 35px rgba(60, 142, 124, 0.4),
+            0 0 20px rgba(60, 142, 124, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           cursor: pointer;
-          transition: transform 0.15s ease;
+          transition: all 0.25s ease;
         }
 
         .download-btn:hover {
-          transform: translateY(-2px);
+          background: rgba(60, 142, 124, 0.9);
           box-shadow:
-            0 14px 32px rgba(40, 120, 200, 0.38),
-            0 0 20px rgba(180, 215, 255, 1);
+            inset 0 0 18px rgba(255, 255, 255, 0.3),
+            0 8px 22px rgba(60, 142, 124, 0.5),
+            0 0 25px rgba(60, 142, 124, 0.4);
+          transform: translateY(-2px);
         }
 
-        .download-btn:active {
+        .download-btn:disabled {
+          opacity: 0.5;
+          cursor: default;
+          box-shadow: none;
+        }
+
+        .download-btn:not(:disabled):active {
           transform: scale(0.97);
         }
 
-        .download-btn::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            120deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.8) 45%,
-            transparent 90%
-          );
-          transform: translateX(-130%);
-          animation: shimmerDL 3.6s infinite;
-          pointer-events: none;
+        .share-instagram-btn {
+          width: 100%;
+          border-radius: 999px;
+          padding: 0.95rem;
+          background: rgba(60, 142, 124, 0.85);
+          backdrop-filter: blur(22px) saturate(150%);
+          -webkit-backdrop-filter: blur(22px) saturate(150%);
+          color: #ffffff;
+          font-weight: 650;
+          position: relative;
+          overflow: hidden;
+          box-shadow:
+            inset 0 0 14px rgba(255, 255, 255, 0.2),
+            0 14px 35px rgba(60, 142, 124, 0.4),
+            0 0 20px rgba(60, 142, 124, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          cursor: pointer;
+          transition: all 0.25s ease;
         }
 
-        @keyframes shimmerDL {
-          0% {
-            transform: translateX(-130%);
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(130%);
-            opacity: 0;
-          }
+        .share-instagram-btn:hover {
+          background: rgba(60, 142, 124, 0.9);
+          box-shadow:
+            inset 0 0 18px rgba(255, 255, 255, 0.3),
+            0 8px 22px rgba(60, 142, 124, 0.5),
+            0 0 25px rgba(60, 142, 124, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .share-instagram-btn:disabled {
+          opacity: 0.5;
+          cursor: default;
+          box-shadow: none;
+        }
+
+        .share-instagram-btn:not(:disabled):active {
+          transform: scale(0.97);
         }
       `}</style>
 
       {/* Background layers */}
       <div className="winter-layer aurora" />
       <div className="winter-layer snowfield" />
-      {/* Canvas Snow */}
-      <canvas id="snow-canvas" className="snow-canvas" />
+      {/* Canvas Snow - DISABLED */}
+      {/* <canvas id="snow-canvas" className="snow-canvas" /> */}
 
       <main
         dir="rtl"
@@ -502,9 +552,9 @@ export default function Page() {
           {/* LOGO */}
           <div className="w-full flex justify-center mb-4">
             <img
-              src="/iceball_logo.png"
-              alt="IceBall logo"
-              style={{ width: "140px", height: "auto" }}
+              src="/collamin_logo.png"
+              alt="Collamin logo"
+              style={{ width: "140px", height: "auto", objectFit: "contain" }}
             />
           </div>
 
@@ -512,15 +562,15 @@ export default function Page() {
           <header className="text-center mb-4">
             <h1
               className="text-3xl font-bold"
-              style={{ color: "#102540", fontWeight: 800 }}
+              style={{ color: "#245b4e", fontWeight: 800 }}
             >
-              آماده‌ای یخ بزنی؟
+              آماده ای با ۲۰ سال بعد مواجه بشی ؟
             </h1>
             <p
-              className="mt-2 text-sm text-gray-700"
-              style={{ fontWeight: 300 }}
+              className="mt-2 text-sm"
+              style={{ color: "#555", fontWeight: 300 }}
             >
-              عکست رو بده؛ من سردترین حالتت رو می‌سازم ❄
+              عکست رو بده تا آیندت رو نشون بدم
             </p>
           </header>
 
@@ -560,7 +610,7 @@ export default function Page() {
               onClick={handleGenerate}
               className="primary-btn"
             >
-              {loading ? "در حال ساخت پرتره زمستونی..." : "بزن که یخ بزنی"}
+              {loading ? "در حال ساخت پرتره زمستونی..." : "نشونم بده"}
               {!loading && <span className="btn-shimmer" />}
             </button>
           </div>
@@ -575,16 +625,35 @@ export default function Page() {
             </div>
           )}
           {output && (
-            <button className="download-btn mt-4" onClick={handleDownload}>
-              دانلود تصویر نهایی ⬇️
-            </button>
+            <div className="mt-4 flex flex-col gap-3">
+              <button className="download-btn" onClick={handleDownload}>
+                دانلود تصویر نهایی ⬇️
+              </button>
+              <button
+                className="share-instagram-btn"
+                onClick={handleShareToInstagram}
+              >
+                📷 اشتراک در استوری اینستاگرام
+              </button>
+            </div>
           )}
 
           {/* FOOTER */}
           <footer className="mt-5 text-center text-gray-700">
             <span style={{ fontWeight: 300 }}>تگمون کن </span>
-            <span style={{ fontWeight: 600 }}>Iceball_ir@</span>
-            <span> ❄</span>
+            <a
+              href="https://www.instagram.com/collamin.iran/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontWeight: 600, color: "inherit", textDecoration: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+            >
+              <img
+                src="/instagram-icon.png"
+                alt="Instagram"
+                style={{ width: "16px", height: "16px", objectFit: "contain" }}
+              />
+              collamin.iran
+            </a>
           </footer>
         </div>
       </main>

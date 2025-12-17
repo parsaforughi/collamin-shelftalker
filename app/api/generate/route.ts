@@ -5,52 +5,37 @@ export const runtime = "nodejs";
 // ---------------------- PROMPT ------------------------
 
 const PROMPT = `
-Create a vertical 9:16 cinematic composite of the user (identity must remain EXACT as in the uploaded face image). 
-The final portrait must be divided into **three vertically stacked frames**:
+You are given a real human portrait photo.
 
-TOP FRAME:
-- Extreme close-up of the user's eye and cheek  
-- Small snowflakes resting on eyelashes  
-- Soft overcast daylight creating natural winter glow  
+Your task is to age the SAME person exactly 20 years older.
 
-MIDDLE FRAME:
-- 3/4 profile of the user  
-- User is gently using the Ice Ball skincare applicator on their cheek  
-- The Ice Ball must be **small and realistic**, human-scale, about the size of a golf ball  
-- White handle + frosted pink translucent sphere  
-- Subtle snowlight reflection  
-- No distortion, no oversized effect, no magical glow  
-- Should look like a natural skincare product in real use  
+CRITICAL RULES:
+- Do NOT change facial identity in any way.
+- Do NOT alter face shape, bone structure, eye shape, nose, lips, or proportions.
+- Do NOT beautify, stylize, or exaggerate aging.
+- Do NOT change hairstyle, hairline, hair color, beard, makeup, or clothing.
+- Do NOT add or remove facial features.
+- Do NOT change camera angle, framing, or expression.
 
-BOTTOM FRAME:
-- Chest-up portrait of the user facing the camera  
-- User holding the Ice Ball close to the face  
-- Calm, emotional winter mood  
-- Gentle falling snow, shallow depth of field  
+AGING REQUIREMENTS:
+- Apply realistic, natural aging consistent with +20 years:
+  - Subtle wrinkles (forehead, eyes, smile lines)
+  - Slight skin texture changes
+  - Mild loss of skin elasticity
+  - Very natural aging signs only
+- Aging must look medically realistic, not cinematic or dramatic.
 
-LIGHTING & STYLE:
-- Soft overcast daylight  
-- Cinematic HDR tone  
-- Shallow depth (Canon EOS R5, 85mm f/1.2 aesthetic)  
-- Photorealistic  
-- Fine skin texture  
-- Visible snow particles  
-- Korean winter skincare campaign aesthetic  
+IMAGE STYLE:
+- Professional studio portrait
+- Clean, neutral background (light gray or soft off-white)
+- Even, soft lighting
+- High realism, no filters, no artistic effects
+- Photographic, clinical accuracy
 
-OUTFIT:
-- Black wool coat  
-- Thick white scarf  
-- Hair neatly tucked  
-- No hat  
-
-ENVIRONMENT:
-- Snowy background with soft focus  
-- Luxurious and emotional winter mood  
-
-PRODUCT RULES:
-- Use the Ice Ball reference image ONLY for accurate shape, material, and reflection  
-- Product must appear premium and elegantly integrated  
-- Absolutely DO NOT enlarge, distort, warp, or glow the Ice Ball  
+OUTPUT:
+- One final image
+- Ultra-realistic
+- The person must be immediately recognizable as the same individual
 `;
 
 // -------------------- MAIN ROUTE ----------------------
@@ -89,21 +74,6 @@ export async function POST(req: NextRequest) {
     const userMime = userFile.type || "image/png";
     const userBase64 = Buffer.from(await userFile.arrayBuffer()).toString("base64");
 
-    // ---------------- ICEBALL REF ----------------
-
-    const refURL = `${baseUrl}/iceball_ref.PNG`;
-    console.log("🧊 Loading IceBall ref:", refURL);
-
-    const refRes = await fetch(refURL);
-    if (!refRes.ok) {
-      return NextResponse.json(
-        { error: "Cannot load IceBall reference file" },
-        { status: 500 }
-      );
-    }
-
-    const refBase64 = Buffer.from(await refRes.arrayBuffer()).toString("base64");
-
     // ---------------- GEMINI REQUEST ----------------
 
     const endpoint =
@@ -116,8 +86,7 @@ export async function POST(req: NextRequest) {
           role: "user",
           parts: [
             { text: PROMPT },
-            { inlineData: { mimeType: userMime, data: userBase64 } },
-            { inlineData: { mimeType: "image/png", data: refBase64 } }
+            { inlineData: { mimeType: userMime, data: userBase64 } }
           ]
         }
       ]
