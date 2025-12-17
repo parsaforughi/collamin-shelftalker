@@ -378,6 +378,7 @@ export default function Page() {
 
   // Handle bottle drag with inertia
   function handleBottleMouseDown(e: React.MouseEvent, bottleId: number) {
+    console.log("🍾 Bottle clicked:", bottleId);
     e.preventDefault();
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
