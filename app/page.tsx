@@ -18,10 +18,15 @@ export default function Page() {
     x: number;
     y: number;
     scale: number;
-    speed: number;
-    offset: number;
+    rotation: number;
+    rotationSpeed: number;
+    driftX: number;
+    driftY: number;
+    velocityX: number;
+    velocityY: number;
     dragging: boolean;
     dragOffset: { x: number; y: number } | null;
+    lastReleaseTime: number;
   }>>([]);
 
   // cleanup preview url
@@ -254,17 +259,41 @@ export default function Page() {
   // Initialize floating bottles on mount
   useEffect(() => {
     const initialBottles = [
-      { id: 1, x: 15, y: 10, scale: 0.6, speed: 0.8, offset: 0, dragging: false, dragOffset: null },
-      { id: 2, x: 80, y: 25, scale: 0.7, speed: 1.0, offset: 50, dragging: false, dragOffset: null },
-      { id: 3, x: 20, y: 60, scale: 0.65, speed: 0.9, offset: 100, dragging: false, dragOffset: null },
-      { id: 4, x: 75, y: 70, scale: 0.6, speed: 0.7, offset: 150, dragging: false, dragOffset: null },
-      { id: 5, x: 10, y: 45, scale: 0.7, speed: 1.1, offset: 200, dragging: false, dragOffset: null },
-      { id: 6, x: 85, y: 15, scale: 0.65, speed: 0.85, offset: 75, dragging: false, dragOffset: null },
+      { 
+        id: 1, x: 15, y: 10, scale: 0.6, rotation: 0, rotationSpeed: 0.0003, 
+        driftX: 0.02, driftY: 0.015, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
+      { 
+        id: 2, x: 80, y: 25, scale: 0.7, rotation: 0, rotationSpeed: -0.00025, 
+        driftX: -0.018, driftY: 0.02, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
+      { 
+        id: 3, x: 20, y: 60, scale: 0.65, rotation: 0, rotationSpeed: 0.00035, 
+        driftX: 0.015, driftY: -0.017, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
+      { 
+        id: 4, x: 75, y: 70, scale: 0.6, rotation: 0, rotationSpeed: -0.0003, 
+        driftX: -0.02, driftY: -0.015, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
+      { 
+        id: 5, x: 10, y: 45, scale: 0.7, rotation: 0, rotationSpeed: 0.00028, 
+        driftX: 0.017, driftY: 0.019, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
+      { 
+        id: 6, x: 85, y: 15, scale: 0.65, rotation: 0, rotationSpeed: -0.00032, 
+        driftX: -0.019, driftY: 0.016, velocityX: 0, velocityY: 0,
+        dragging: false, dragOffset: null, lastReleaseTime: 0
+      },
     ];
     setBottles(initialBottles);
   }, []);
 
-  // Floating animation
+  // Floating animation - natural drift with rotation
   useEffect(() => {
     if (bottles.length === 0) return;
 
@@ -273,29 +302,63 @@ export default function Page() {
 
     function animate() {
       const currentTime = Date.now();
-      const deltaTime = (currentTime - lastTime) / 1000;
+      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1); // Cap deltaTime
       lastTime = currentTime;
 
       setBottles((prev) =>
         prev.map((bottle) => {
           if (bottle.dragging) return bottle;
           
-          const time = currentTime / 1000;
-          const baseY = bottle.y;
-          const baseX = bottle.x;
+          // Inertia after release (gradual slowdown)
+          const timeSinceRelease = currentTime - bottle.lastReleaseTime;
+          const inertiaActive = timeSinceRelease < 2000; // 2 seconds of inertia
+          const inertiaDecay = Math.max(0, 1 - timeSinceRelease / 2000);
           
-          // Calculate floating offset (subtle movement)
-          const floatY = Math.sin(time * bottle.speed + bottle.offset) * 0.8;
-          const floatX = Math.cos(time * bottle.speed * 0.7 + bottle.offset) * 0.5;
+          let newX = bottle.x;
+          let newY = bottle.y;
+          let newVelocityX = bottle.velocityX;
+          let newVelocityY = bottle.velocityY;
+          let newRotation = bottle.rotation;
+          
+          if (inertiaActive && (bottle.velocityX !== 0 || bottle.velocityY !== 0)) {
+            // Apply inertia with decay
+            newX += bottle.velocityX * deltaTime * inertiaDecay;
+            newY += bottle.velocityY * deltaTime * inertiaDecay;
+            newVelocityX *= 0.95; // Friction
+            newVelocityY *= 0.95;
+          } else {
+            // Natural drift (very slow, minimal movement)
+            newX += bottle.driftX * deltaTime * 10;
+            newY += bottle.driftY * deltaTime * 10;
+            newVelocityX = 0;
+            newVelocityY = 0;
+          }
+          
+          // Very slow rotation (±2-4 degrees range)
+          newRotation += bottle.rotationSpeed * deltaTime * 1000;
+          if (newRotation > 4) {
+            newRotation = 4;
+            bottle.rotationSpeed = -Math.abs(bottle.rotationSpeed);
+          } else if (newRotation < -4) {
+            newRotation = -4;
+            bottle.rotationSpeed = Math.abs(bottle.rotationSpeed);
+          }
           
           // Ensure bottles stay in safe zones
-          const newX = Math.max(5, Math.min(95, baseX + floatX));
-          const newY = Math.max(15, Math.min(85, baseY + floatY));
+          newX = Math.max(5, Math.min(95, newX));
+          newY = Math.max(15, Math.min(85, newY));
           
           // Avoid center card area (middle 40% width)
           const safeX = (newX < 30 || newX > 70) ? newX : (newX < 50 ? 30 : 70);
           
-          return { ...bottle, x: safeX, y: newY };
+          return { 
+            ...bottle, 
+            x: safeX, 
+            y: newY, 
+            rotation: newRotation,
+            velocityX: newVelocityX,
+            velocityY: newVelocityY
+          };
         })
       );
 
@@ -309,7 +372,7 @@ export default function Page() {
     };
   }, [bottles.length]);
 
-  // Handle bottle drag
+  // Handle bottle drag with inertia
   function handleBottleMouseDown(e: React.MouseEvent, bottleId: number) {
     e.preventDefault();
     e.stopPropagation();
@@ -321,10 +384,14 @@ export default function Page() {
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
+    let lastX = ((e.clientX - containerRect.left - offsetX) / containerRect.width) * 100;
+    let lastY = ((e.clientY - containerRect.top - offsetY) / containerRect.height) * 100;
+    let lastMoveTime = Date.now();
+
     setBottles((prev) =>
       prev.map((b) =>
         b.id === bottleId
-          ? { ...b, dragging: true, dragOffset: { x: offsetX, y: offsetY } }
+          ? { ...b, dragging: true, dragOffset: { x: offsetX, y: offsetY }, velocityX: 0, velocityY: 0 }
           : b
       )
     );
@@ -332,10 +399,21 @@ export default function Page() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRect) return;
       
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastMoveTime) / 1000;
+      lastMoveTime = currentTime;
+      
       const x = ((e.clientX - containerRect.left - offsetX) / containerRect.width) * 100;
       const y = ((e.clientY - containerRect.top - offsetY) / containerRect.height) * 100;
       
-      // Constrain to safe zones (avoid center 40% width, avoid top 15% and bottom 15%)
+      // Calculate velocity for inertia
+      const velocityX = deltaTime > 0 ? (x - lastX) / deltaTime : 0;
+      const velocityY = deltaTime > 0 ? (y - lastY) / deltaTime : 0;
+      
+      lastX = x;
+      lastY = y;
+      
+      // Constrain to safe zones
       const safeX = Math.max(5, Math.min(95, x));
       const safeY = Math.max(15, Math.min(85, y));
       
@@ -344,7 +422,9 @@ export default function Page() {
       
       setBottles((prev) =>
         prev.map((b) =>
-          b.id === bottleId ? { ...b, x: constrainedX, y: safeY } : b
+          b.id === bottleId 
+            ? { ...b, x: constrainedX, y: safeY, velocityX, velocityY } 
+            : b
         )
       );
     };
@@ -352,7 +432,9 @@ export default function Page() {
     const handleMouseUp = () => {
       setBottles((prev) =>
         prev.map((b) =>
-          b.id === bottleId ? { ...b, dragging: false, dragOffset: null } : b
+          b.id === bottleId 
+            ? { ...b, dragging: false, dragOffset: null, lastReleaseTime: Date.now() } 
+            : b
         )
       );
       document.removeEventListener("mousemove", handleMouseMove);
