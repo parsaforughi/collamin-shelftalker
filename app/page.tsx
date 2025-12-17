@@ -1002,7 +1002,7 @@ export default function Page() {
               </div>
 
               {/* Download Button Section */}
-              {result && (withoutCollamin || withCollamin) && (
+              {(withoutCollamin || withCollamin) && (
                 <div className="mt-6">
                   <button 
                     className="download-btn" 
