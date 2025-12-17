@@ -441,12 +441,23 @@ export default function Page() {
         }
 
         .preview-frame {
+          display: inline-block;
           border-radius: 20px;
           padding: 0.3rem;
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 250, 0.95));
           box-shadow:
             0 12px 26px rgba(20, 178, 170, 0.25),
             inset 0 0 18px rgba(255, 255, 255, 0.9);
+          width: fit-content;
+          max-width: 100%;
+        }
+
+        .preview-frame img {
+          display: block;
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          border-radius: 18px;
         }
 
         .result-frame {
@@ -836,8 +847,8 @@ export default function Page() {
 
           {/* PREVIEW */}
           {preview && (
-            <div className="preview-frame mt-6">
-              <img src={preview} alt="preview" style={{ borderRadius: "18px" }} />
+            <div className="preview-frame mt-6" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <img src={preview} alt="preview" />
             </div>
           )}
 
