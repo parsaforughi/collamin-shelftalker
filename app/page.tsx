@@ -844,17 +844,6 @@ export default function Page() {
                     }}
                   />
 
-                  {/* Visual Difference Hints */}
-                  <div className="skin-hint hint-left-forehead">
-                    خطوط عمیق‌تر
-                  </div>
-                  <div className="skin-hint hint-left-eye">
-                    کاهش الاستیسیته
-                  </div>
-                  <div className="skin-hint hint-right-forehead">
-                    بافت صاف‌تر پوست
-                  </div>
-
                   {/* Divider Line */}
                   <div
                     className="comparison-divider"
