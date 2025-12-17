@@ -12,6 +12,18 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Floating bottles state
+  const [bottles, setBottles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    scale: number;
+    speed: number;
+    offset: number;
+    dragging: boolean;
+    dragOffset: { x: number; y: number } | null;
+  }>>([]);
+
   // cleanup preview url
   useEffect(() => {
     return () => {
@@ -446,6 +458,11 @@ export default function Page() {
           z-index: 10;
         }
 
+        main {
+          position: relative;
+          z-index: 10;
+        }
+
 
         /* Upload zone */
         .upload-zone {
@@ -808,11 +825,67 @@ export default function Page() {
           margin: 0 auto;
           opacity: 0.9;
         }
+
+        /* Floating Bottles Background */
+        .floating-bottles-container {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 1;
+          overflow: hidden;
+        }
+
+        .floating-bottle {
+          position: absolute;
+          width: 120px;
+          height: auto;
+          opacity: 0.15;
+          filter: blur(1px);
+          transition: transform 0.3s ease-out;
+          pointer-events: auto;
+          cursor: grab;
+          user-select: none;
+          transform-origin: center;
+        }
+
+        .floating-bottle:hover {
+          opacity: 0.2;
+        }
+
+        .floating-bottle:active {
+          cursor: grabbing;
+          opacity: 0.25;
+        }
+
+        .floating-bottle.dragging {
+          transition: none;
+          z-index: 2;
+        }
       `}</style>
 
       {/* Background layers */}
       <div className="winter-layer aurora" />
       <div className="winter-layer snowfield" />
+      
+      {/* Floating Bottles Background */}
+      <div className="floating-bottles-container">
+        {bottles.map((bottle) => (
+          <img
+            key={bottle.id}
+            src="/collamin-bottle.webp"
+            alt=""
+            className={`floating-bottle ${bottle.dragging ? "dragging" : ""}`}
+            style={{
+              left: `${bottle.x}%`,
+              top: `${bottle.y}%`,
+              transform: `translate(-50%, -50%) scale(${bottle.scale})`,
+              transition: bottle.dragging ? "none" : "transform 0.3s ease-out",
+            }}
+            onMouseDown={(e) => handleBottleMouseDown(e, bottle.id)}
+            draggable={false}
+          />
+        ))}
+      </div>
       {/* Canvas Snow - DISABLED */}
       {/* <canvas id="snow-canvas" className="snow-canvas" /> */}
 
