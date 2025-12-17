@@ -347,12 +347,18 @@ export default function Page() {
             newRotationSpeed = Math.abs(bottle.rotationSpeed);
           }
           
-          // Ensure bottles stay in safe zones
+          // Ensure bottles stay in safe zones - avoid center card area (tighter on mobile)
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          const cardLeft = isMobile ? 10 : 30;  // Card starts at 10% on mobile, 30% on desktop
+          const cardRight = isMobile ? 90 : 70;  // Card ends at 90% on mobile, 70% on desktop
+          
           newX = Math.max(5, Math.min(95, newX));
           newY = Math.max(15, Math.min(85, newY));
           
-          // Avoid center card area (middle 40% width)
-          const safeX = (newX < 30 || newX > 70) ? newX : (newX < 50 ? 30 : 70);
+          // Push away from center if in card zone
+          const safeX = (newX < cardLeft || newX > cardRight) 
+            ? newX 
+            : (newX < 50 ? cardLeft : cardRight);
           
           return { 
             ...bottle, 
