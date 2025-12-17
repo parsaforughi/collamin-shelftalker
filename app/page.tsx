@@ -1078,6 +1078,19 @@ export default function Page() {
               transition: bottle.dragging ? "none" : "none",
             }}
             onMouseDown={(e) => handleBottleMouseDown(e, bottle.id)}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              const touch = e.touches[0];
+              const fakeEvent = {
+                ...e,
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                currentTarget: e.currentTarget,
+                preventDefault: () => e.preventDefault(),
+                stopPropagation: () => e.stopPropagation(),
+              } as any;
+              handleBottleMouseDown(fakeEvent, bottle.id);
+            }}
             draggable={false}
           />
         ))}
