@@ -223,6 +223,22 @@ export default function Page() {
     document.body.removeChild(a);
   }
 
+  // Download all 3 images with small delays
+  async function handleDownloadAll() {
+    if (!withoutCollamin || !withCollamin || !storyComparison) return;
+    
+    // Download without Collamin
+    handleDownloadWithout();
+    
+    // Wait 200ms before next download
+    await new Promise(resolve => setTimeout(resolve, 200));
+    handleDownloadWith();
+    
+    // Wait 200ms before last download
+    await new Promise(resolve => setTimeout(resolve, 200));
+    handleDownloadStory();
+  }
+
   async function handleShareToInstagram() {
     if (!storyComparison) {
       // If story image not available, download it for user
