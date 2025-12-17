@@ -1072,8 +1072,8 @@ export default function Page() {
             style={{
               left: `${bottle.x}%`,
               top: `${bottle.y}%`,
-              transform: `translate(-50%, -50%) scale(${bottle.scale})`,
-              transition: bottle.dragging ? "none" : "transform 0.3s ease-out",
+              transform: `translate(-50%, -50%) scale(${bottle.scale}) rotate(${bottle.rotation}deg)`,
+              transition: bottle.dragging ? "none" : "none",
             }}
             onMouseDown={(e) => handleBottleMouseDown(e, bottle.id)}
             draggable={false}
