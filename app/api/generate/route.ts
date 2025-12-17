@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const runtime = "nodejs";
 
@@ -119,38 +118,59 @@ export async function POST(req: NextRequest) {
 
     // ---------------- GEMINI SETUP ----------------
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-3-pro-image-preview"
-    });
-
     console.log("📡 Generating both future images…");
 
-    // Helper function to generate an image
+    // Helper function to generate an image using REST API
     const generateFutureImage = async (promptText: string): Promise<string | null> => {
-      const prompt = [
-        { text: promptText },
-        {
-          inlineData: {
-            mimeType: userMime,
-            data: userBase64
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: promptText },
+              {
+                inlineData: {
+                  mimeType: userMime,
+                  data: userBase64
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Gemini API error:", response.status, errorText);
+          throw new Error(`Gemini API error: ${response.status} - ${errorText.substring(0, 200)}`);
+        }
+
+        const result = await response.json();
+
+        // Extract base64 image from response
+        for (const candidate of result.candidates || []) {
+          for (const part of candidate.content?.parts || []) {
+            if (part.inlineData?.data) {
+              return part.inlineData.data;
+            }
           }
         }
-      ];
-
-      const response = await model.generateContent({
-        contents: [{ role: "user", parts: prompt }]
-      });
-
-      const result = response.response;
-      for (const candidate of result.candidates || []) {
-        for (const part of candidate.content?.parts || []) {
-          if (part.inlineData?.data) {
-            return part.inlineData.data;
-          }
-        }
+        return null;
+      } catch (error: any) {
+        console.error("❌ Error calling Gemini API:", error?.message || error);
+        throw error;
       }
-      return null;
     };
 
     // Generate both images
