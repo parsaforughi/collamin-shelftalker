@@ -1039,7 +1039,7 @@ export default function Page() {
           position: fixed;
           inset: 0;
           pointer-events: none;
-          z-index: 101;
+          z-index: 150;
           overflow: hidden;
         }
 
@@ -1051,10 +1051,10 @@ export default function Page() {
           filter: blur(0.5px);
           transition: transform 0.3s ease-out;
           pointer-events: auto !important;
-          cursor: grab;
+          cursor: grab !important;
           user-select: none;
           transform-origin: center;
-          z-index: 102;
+          z-index: 151;
           touch-action: none;
           will-change: transform;
         }
