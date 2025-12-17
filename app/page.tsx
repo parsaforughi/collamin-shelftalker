@@ -824,7 +824,7 @@ export default function Page() {
               className="text-xs text-gray-600"
               style={{ opacity: 0.9 }}
             >
-              (فرمت PNG یا JPG، نور معمولی، صورت واضح)
+              (فرمت PNG یا JPG، تصویر عمودی، نور معمولی، صورت واضح)
             </p>
             <input
               type="file"
