@@ -251,6 +251,118 @@ export default function Page() {
     }
   }
 
+  // Initialize floating bottles on mount
+  useEffect(() => {
+    const initialBottles = [
+      { id: 1, x: 15, y: 10, scale: 0.3, speed: 0.8, offset: 0, dragging: false, dragOffset: null },
+      { id: 2, x: 80, y: 25, scale: 0.4, speed: 1.0, offset: 50, dragging: false, dragOffset: null },
+      { id: 3, x: 20, y: 60, scale: 0.35, speed: 0.9, offset: 100, dragging: false, dragOffset: null },
+      { id: 4, x: 75, y: 70, scale: 0.3, speed: 0.7, offset: 150, dragging: false, dragOffset: null },
+      { id: 5, x: 10, y: 45, scale: 0.4, speed: 1.1, offset: 200, dragging: false, dragOffset: null },
+      { id: 6, x: 85, y: 15, scale: 0.35, speed: 0.85, offset: 75, dragging: false, dragOffset: null },
+    ];
+    setBottles(initialBottles);
+  }, []);
+
+  // Floating animation
+  useEffect(() => {
+    if (bottles.length === 0) return;
+
+    let animationId: number;
+    let lastTime = Date.now();
+
+    function animate() {
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      setBottles((prev) =>
+        prev.map((bottle) => {
+          if (bottle.dragging) return bottle;
+          
+          const time = currentTime / 1000;
+          const baseY = bottle.y;
+          const baseX = bottle.x;
+          
+          // Calculate floating offset (subtle movement)
+          const floatY = Math.sin(time * bottle.speed + bottle.offset) * 0.8;
+          const floatX = Math.cos(time * bottle.speed * 0.7 + bottle.offset) * 0.5;
+          
+          // Ensure bottles stay in safe zones
+          const newX = Math.max(5, Math.min(95, baseX + floatX));
+          const newY = Math.max(15, Math.min(85, baseY + floatY));
+          
+          // Avoid center card area (middle 40% width)
+          const safeX = (newX < 30 || newX > 70) ? newX : (newX < 50 ? 30 : 70);
+          
+          return { ...bottle, x: safeX, y: newY };
+        })
+      );
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+  }, [bottles.length]);
+
+  // Handle bottle drag
+  function handleBottleMouseDown(e: React.MouseEvent, bottleId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const containerRect = (e.currentTarget.parentElement as HTMLElement)?.getBoundingClientRect();
+    
+    if (!containerRect) return;
+
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    setBottles((prev) =>
+      prev.map((b) =>
+        b.id === bottleId
+          ? { ...b, dragging: true, dragOffset: { x: offsetX, y: offsetY } }
+          : b
+      )
+    );
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRect) return;
+      
+      const x = ((e.clientX - containerRect.left - offsetX) / containerRect.width) * 100;
+      const y = ((e.clientY - containerRect.top - offsetY) / containerRect.height) * 100;
+      
+      // Constrain to safe zones (avoid center 40% width, avoid top 15% and bottom 15%)
+      const safeX = Math.max(5, Math.min(95, x));
+      const safeY = Math.max(15, Math.min(85, y));
+      
+      // Avoid center card area (middle 40% width)
+      const constrainedX = (safeX < 30 || safeX > 70) ? safeX : (safeX < 50 ? 30 : 70);
+      
+      setBottles((prev) =>
+        prev.map((b) =>
+          b.id === bottleId ? { ...b, x: constrainedX, y: safeY } : b
+        )
+      );
+    };
+
+    const handleMouseUp = () => {
+      setBottles((prev) =>
+        prev.map((b) =>
+          b.id === bottleId ? { ...b, dragging: false, dragOffset: null } : b
+        )
+      );
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  }
+
   // اسکرول و اوپاسیتی اولیه
   useEffect(() => {
     document.body.style.overflowY = "auto";
