@@ -949,10 +949,10 @@ export default function Page() {
 
         .floating-bottle {
           position: absolute;
-          width: 120px;
+          width: 180px;
           height: auto;
-          opacity: 0.15;
-          filter: blur(1px);
+          opacity: 0.85;
+          filter: blur(0.5px);
           transition: transform 0.3s ease-out;
           pointer-events: auto;
           cursor: grab;
@@ -961,12 +961,12 @@ export default function Page() {
         }
 
         .floating-bottle:hover {
-          opacity: 0.2;
+          opacity: 0.95;
         }
 
         .floating-bottle:active {
           cursor: grabbing;
-          opacity: 0.25;
+          opacity: 1;
         }
 
         .floating-bottle.dragging {
