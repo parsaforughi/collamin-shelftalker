@@ -376,21 +376,28 @@ export default function Page() {
     };
   }, [bottles.length]);
 
-  // Handle bottle drag with inertia
-  function handleBottleMouseDown(e: React.MouseEvent, bottleId: number) {
-    console.log("🍾 Bottle clicked:", bottleId);
-    e.preventDefault();
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const containerRect = (e.currentTarget.parentElement as HTMLElement)?.getBoundingClientRect();
+  // Handle bottle drag with inertia (works for both mouse and touch)
+  function handleBottleInteraction(
+    clientX: number,
+    clientY: number,
+    bottleId: number,
+    isTouch: boolean = false
+  ) {
+    console.log("🍾 Bottle interaction:", bottleId, isTouch ? "touch" : "mouse");
+    
+    const bottleElement = document.querySelector(`[data-bottle-id="${bottleId}"]`) as HTMLElement;
+    if (!bottleElement) return;
+    
+    const rect = bottleElement.getBoundingClientRect();
+    const containerRect = (bottleElement.parentElement as HTMLElement)?.getBoundingClientRect();
     
     if (!containerRect) return;
 
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const offsetX = clientX - rect.left;
+    const offsetY = clientY - rect.top;
 
-    let lastX = ((e.clientX - containerRect.left - offsetX) / containerRect.width) * 100;
-    let lastY = ((e.clientY - containerRect.top - offsetY) / containerRect.height) * 100;
+    let lastX = ((clientX - containerRect.left - offsetX) / containerRect.width) * 100;
+    let lastY = ((clientY - containerRect.top - offsetY) / containerRect.height) * 100;
     let lastMoveTime = Date.now();
 
     setBottles((prev) =>
@@ -401,15 +408,15 @@ export default function Page() {
       )
     );
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMove = (moveX: number, moveY: number) => {
       if (!containerRect) return;
       
       const currentTime = Date.now();
       const deltaTime = (currentTime - lastMoveTime) / 1000;
       lastMoveTime = currentTime;
       
-      const x = ((e.clientX - containerRect.left - offsetX) / containerRect.width) * 100;
-      const y = ((e.clientY - containerRect.top - offsetY) / containerRect.height) * 100;
+      const x = ((moveX - containerRect.left - offsetX) / containerRect.width) * 100;
+      const y = ((moveY - containerRect.top - offsetY) / containerRect.height) * 100;
       
       // Calculate velocity for inertia
       const velocityX = deltaTime > 0 ? (x - lastX) / deltaTime : 0;
@@ -418,12 +425,17 @@ export default function Page() {
       lastX = x;
       lastY = y;
       
-      // Constrain to safe zones
+      // Constrain to safe zones - more aggressive on mobile
+      const isMobile = window.innerWidth < 768;
       const safeX = Math.max(5, Math.min(95, x));
       const safeY = Math.max(15, Math.min(85, y));
       
-      // Avoid center card area (middle 40% width)
-      const constrainedX = (safeX < 30 || safeX > 70) ? safeX : (safeX < 50 ? 30 : 70);
+      // Avoid center card area - tighter constraint on mobile
+      const cardLeft = isMobile ? 10 : 30;  // Card starts at 10% on mobile, 30% on desktop
+      const cardRight = isMobile ? 90 : 70;  // Card ends at 90% on mobile, 70% on desktop
+      const constrainedX = (safeX < cardLeft || safeX > cardRight) 
+        ? safeX 
+        : (safeX < 50 ? cardLeft : cardRight);
       
       setBottles((prev) =>
         prev.map((b) =>
@@ -434,7 +446,18 @@ export default function Page() {
       );
     };
 
-    const handleMouseUp = () => {
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        e.preventDefault();
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const handleEnd = () => {
       setBottles((prev) =>
         prev.map((b) =>
           b.id === bottleId 
@@ -442,12 +465,40 @@ export default function Page() {
             : b
         )
       );
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      if (isTouch) {
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleEnd);
+        document.removeEventListener("touchcancel", handleEnd);
+      } else {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleEnd);
+      }
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    if (isTouch) {
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchend", handleEnd);
+      document.addEventListener("touchcancel", handleEnd);
+    } else {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleEnd);
+    }
+  }
+
+  // Handle mouse drag
+  function handleBottleMouseDown(e: React.MouseEvent, bottleId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleBottleInteraction(e.clientX, e.clientY, bottleId, false);
+  }
+
+  // Handle touch drag
+  function handleBottleTouchStart(e: React.TouchEvent, bottleId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.touches.length > 0) {
+      handleBottleInteraction(e.touches[0].clientX, e.touches[0].clientY, bottleId, true);
+    }
   }
 
   // اسکرول و اوپاسیتی اولیه
@@ -1092,20 +1143,9 @@ export default function Page() {
               transform: `translate(-50%, -50%) scale(${bottle.scale}) rotate(${bottle.rotation}deg)`,
               transition: bottle.dragging ? "none" : "none",
             }}
+            data-bottle-id={bottle.id}
             onMouseDown={(e) => handleBottleMouseDown(e, bottle.id)}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              const touch = e.touches[0];
-              const fakeEvent = {
-                ...e,
-                clientX: touch.clientX,
-                clientY: touch.clientY,
-                currentTarget: e.currentTarget,
-                preventDefault: () => e.preventDefault(),
-                stopPropagation: () => e.stopPropagation(),
-              } as any;
-              handleBottleMouseDown(fakeEvent, bottle.id);
-            }}
+            onTouchStart={(e) => handleBottleTouchStart(e, bottle.id)}
             draggable={false}
           />
         ))}
