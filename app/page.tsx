@@ -567,12 +567,12 @@ export default function Page() {
         .result-frame,
         .preview-frame {
           position: relative;
-          z-index: 10;
+          z-index: 100;
         }
 
         main {
           position: relative;
-          z-index: 10;
+          z-index: 100;
         }
 
 
@@ -943,7 +943,7 @@ export default function Page() {
           position: fixed;
           inset: 0;
           pointer-events: none;
-          z-index: 1;
+          z-index: 0;
           overflow: hidden;
         }
 
