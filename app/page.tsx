@@ -660,6 +660,15 @@ export default function Page() {
           position: relative;
           z-index: 100;
         }
+        
+        /* Ensure bottles can be clicked even when behind main in safe zones */
+        .floating-bottles-container {
+          pointer-events: none;
+        }
+        
+        .floating-bottles-container .floating-bottle {
+          pointer-events: auto !important;
+        }
 
 
         /* Upload zone */
