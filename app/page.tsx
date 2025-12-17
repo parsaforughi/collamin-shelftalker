@@ -154,6 +154,44 @@ export default function Page() {
     document.addEventListener("touchend", handleMouseUp);
   }
 
+  function handleDownload() {
+    if (!withCollamin) return;
+    
+    // Download the "with Collamin" image (the better future)
+    const a = document.createElement("a");
+    a.href = withCollamin;
+    a.download = "collamin-future-20-years.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function handleShareToInstagram() {
+    if (!withCollamin) return;
+
+    try {
+      // Convert blob URL to File
+      const response = await fetch(withCollamin);
+      const blob = await response.blob();
+      const file = new File([blob], "collamin-future.png", { type: "image/png" });
+
+      // Check if Web Share API is available
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "آینده‌ام با کلامین",
+        });
+      } else {
+        // Fallback: Try to open Instagram app directly
+        window.location.href = "instagram://story-camera";
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+      // Fallback: Open Instagram app
+      window.location.href = "instagram://story-camera";
+    }
+  }
+
   // اسکرول و اوپاسیتی اولیه
   useEffect(() => {
     document.body.style.overflowY = "auto";
@@ -882,6 +920,22 @@ export default function Page() {
                   alt="Collamin"
                   className="product-image"
                 />
+              </div>
+
+              {/* Download and Share Buttons */}
+              <div className="mt-4 flex flex-col gap-3">
+                <button 
+                  className="download-btn" 
+                  onClick={handleDownload}
+                >
+                  دانلود تصویر نهایی ⬇️
+                </button>
+                <button
+                  className="share-instagram-btn"
+                  onClick={handleShareToInstagram}
+                >
+                  📷 اشتراک در استوری اینستاگرام
+                </button>
               </div>
             </div>
           )}
