@@ -971,7 +971,7 @@ export default function Page() {
 
         .floating-bottle.dragging {
           transition: none;
-          z-index: 2;
+          z-index: 99;
         }
       `}</style>
 
