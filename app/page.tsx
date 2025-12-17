@@ -898,8 +898,8 @@ export default function Page() {
 
                   {/* Labels */}
                   <div className="comparison-labels">
-                    <div className="comparison-label">۲۰ سال بعد — با کلامین</div>
                     <div className="comparison-label">۲۰ سال بعد — بدون کلامین</div>
+                    <div className="comparison-label">۲۰ سال بعد — با کلامین</div>
                   </div>
                 </div>
               </div>
