@@ -839,71 +839,12 @@ export default function Page() {
           opacity: 0.9;
         }
 
-        /* Floating Bottles Background */
-        .floating-bottles-container {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          z-index: 150;
-          overflow: hidden;
-        }
-
-        .floating-bottle {
-          position: absolute;
-          width: 180px;
-          height: auto;
-          opacity: 0.85;
-          filter: blur(0.5px);
-          transition: transform 0.3s ease-out;
-          pointer-events: auto !important;
-          cursor: grab !important;
-          user-select: none;
-          transform-origin: center;
-          z-index: 151;
-          touch-action: none;
-          will-change: transform;
-        }
-
-        .floating-bottle:hover {
-          opacity: 0.95;
-        }
-
-        .floating-bottle:active {
-          cursor: grabbing;
-          opacity: 1;
-        }
-
-        .floating-bottle.dragging {
-          transition: none;
-          z-index: 99;
-        }
       `}</style>
 
       {/* Background layers */}
       <div className="winter-layer aurora" />
       <div className="winter-layer snowfield" />
       
-      {/* Floating Bottles Background */}
-      <div className="floating-bottles-container">
-        {bottles.map((bottle) => (
-          <img
-            key={bottle.id}
-            src="/collamin-bottle.webp"
-            alt=""
-            className={`floating-bottle ${bottle.dragging ? "dragging" : ""}`}
-            style={{
-              left: `${bottle.x}%`,
-              top: `${bottle.y}%`,
-              transform: `translate(-50%, -50%) scale(${bottle.scale}) rotate(${bottle.rotation}deg)`,
-              transition: bottle.dragging ? "none" : "none",
-            }}
-            data-bottle-id={bottle.id}
-            onMouseDown={(e) => handleBottleMouseDown(e, bottle.id)}
-            onTouchStart={(e) => handleBottleTouchStart(e, bottle.id)}
-            draggable={false}
-          />
-        ))}
-      </div>
       {/* Canvas Snow - DISABLED */}
       {/* <canvas id="snow-canvas" className="snow-canvas" /> */}
 
