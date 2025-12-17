@@ -259,24 +259,33 @@ export default function Page() {
   // Initialize floating bottles on mount
   useEffect(() => {
     console.log("🍾 Initializing floating bottles...");
+    // Adjust initial positions based on screen size (mobile vs desktop)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const cardLeft = isMobile ? 10 : 30;
+    const cardRight = isMobile ? 90 : 70;
+    
+    // Position bottles outside card area
+    const leftSide = isMobile ? 5 : 15;   // Far left on mobile, closer on desktop
+    const rightSide = isMobile ? 95 : 85; // Far right on mobile, closer on desktop
+    
     const initialBottles = [
       { 
-        id: 1, x: 15, y: 10, scale: 0.6, rotation: 0, rotationSpeed: 0.0003, 
+        id: 1, x: leftSide, y: 10, scale: 0.6, rotation: 0, rotationSpeed: 0.0003, 
         driftX: 0.02, driftY: 0.015, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
       { 
-        id: 2, x: 80, y: 25, scale: 0.7, rotation: 0, rotationSpeed: -0.00025, 
+        id: 2, x: rightSide, y: 25, scale: 0.7, rotation: 0, rotationSpeed: -0.00025, 
         driftX: -0.018, driftY: 0.02, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
       { 
-        id: 3, x: 20, y: 60, scale: 0.65, rotation: 0, rotationSpeed: 0.00035, 
+        id: 3, x: leftSide, y: 60, scale: 0.65, rotation: 0, rotationSpeed: 0.00035, 
         driftX: 0.015, driftY: -0.017, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
       { 
-        id: 4, x: 75, y: 70, scale: 0.6, rotation: 0, rotationSpeed: -0.0003, 
+        id: 4, x: rightSide, y: 70, scale: 0.6, rotation: 0, rotationSpeed: -0.0003, 
         driftX: -0.02, driftY: -0.015, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
