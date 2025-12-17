@@ -290,12 +290,12 @@ export default function Page() {
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
       { 
-        id: 5, x: 10, y: 45, scale: 0.7, rotation: 0, rotationSpeed: 0.00028, 
+        id: 5, x: leftSide, y: 45, scale: 0.7, rotation: 0, rotationSpeed: 0.00028, 
         driftX: 0.017, driftY: 0.019, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
       { 
-        id: 6, x: 85, y: 15, scale: 0.65, rotation: 0, rotationSpeed: -0.00032, 
+        id: 6, x: rightSide, y: 15, scale: 0.65, rotation: 0, rotationSpeed: -0.00032, 
         driftX: -0.019, driftY: 0.016, velocityX: 0, velocityY: 0,
         dragging: false, dragOffset: null, lastReleaseTime: 0
       },
