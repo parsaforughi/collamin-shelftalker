@@ -1027,7 +1027,7 @@ export default function Page() {
           position: fixed;
           inset: 0;
           pointer-events: none;
-          z-index: 5;
+          z-index: 50;
           overflow: hidden;
         }
 
@@ -1042,8 +1042,9 @@ export default function Page() {
           cursor: grab;
           user-select: none;
           transform-origin: center;
-          z-index: 6;
+          z-index: 51;
           touch-action: none;
+          will-change: transform;
         }
 
         .floating-bottle:hover {
