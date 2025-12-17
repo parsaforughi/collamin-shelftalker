@@ -254,12 +254,12 @@ export default function Page() {
   // Initialize floating bottles on mount
   useEffect(() => {
     const initialBottles = [
-      { id: 1, x: 15, y: 10, scale: 0.3, speed: 0.8, offset: 0, dragging: false, dragOffset: null },
-      { id: 2, x: 80, y: 25, scale: 0.4, speed: 1.0, offset: 50, dragging: false, dragOffset: null },
-      { id: 3, x: 20, y: 60, scale: 0.35, speed: 0.9, offset: 100, dragging: false, dragOffset: null },
-      { id: 4, x: 75, y: 70, scale: 0.3, speed: 0.7, offset: 150, dragging: false, dragOffset: null },
-      { id: 5, x: 10, y: 45, scale: 0.4, speed: 1.1, offset: 200, dragging: false, dragOffset: null },
-      { id: 6, x: 85, y: 15, scale: 0.35, speed: 0.85, offset: 75, dragging: false, dragOffset: null },
+      { id: 1, x: 15, y: 10, scale: 0.6, speed: 0.8, offset: 0, dragging: false, dragOffset: null },
+      { id: 2, x: 80, y: 25, scale: 0.7, speed: 1.0, offset: 50, dragging: false, dragOffset: null },
+      { id: 3, x: 20, y: 60, scale: 0.65, speed: 0.9, offset: 100, dragging: false, dragOffset: null },
+      { id: 4, x: 75, y: 70, scale: 0.6, speed: 0.7, offset: 150, dragging: false, dragOffset: null },
+      { id: 5, x: 10, y: 45, scale: 0.7, speed: 1.1, offset: 200, dragging: false, dragOffset: null },
+      { id: 6, x: 85, y: 15, scale: 0.65, speed: 0.85, offset: 75, dragging: false, dragOffset: null },
     ];
     setBottles(initialBottles);
   }, []);
