@@ -139,14 +139,7 @@ export async function POST(req: NextRequest) {
       ];
 
       const response = await model.generateContent({
-        contents: [{ role: "user", parts: prompt }],
-        generationConfig: {
-          responseModality: "IMAGE",
-          imageConfig: {
-            aspectRatio: "16:9",
-            imageSize: "2K",
-          },
-        } as any
+        contents: [{ role: "user", parts: prompt }]
       });
 
       const result = response.response;
