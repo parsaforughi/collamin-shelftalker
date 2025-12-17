@@ -1348,38 +1348,18 @@ export default function Page() {
                 />
               </div>
 
-              {/* Download Buttons Section */}
-              <div className="mt-6">
-                <h3
-                  className="text-center mb-3 text-lg font-semibold"
-                  style={{ color: "#245b4e" }}
-                >
-                  دانلود تصاویر
-                </h3>
-                <div className="flex flex-col gap-3">
+              {/* Download Button Section */}
+              {result && (withoutCollamin || withCollamin) && (
+                <div className="mt-6">
                   <button 
                     className="download-btn" 
-                    onClick={handleDownloadWithout}
-                    disabled={!withoutCollamin}
+                    onClick={handleDownloadAll}
+                    disabled={!withoutCollamin || !withCollamin || !storyComparison}
                   >
-                    دانلود عکس بدون کلامین ⬇️
-                  </button>
-                  <button 
-                    className="download-btn" 
-                    onClick={handleDownloadWith}
-                    disabled={!withCollamin}
-                  >
-                    دانلود عکس با کلامین ⬇️
-                  </button>
-                  <button 
-                    className="download-btn" 
-                    onClick={handleDownloadStory}
-                    disabled={!storyComparison}
-                  >
-                    دانلود نسخه استوری ⬇️
+                    دانلود همه تصاویر ⬇️
                   </button>
                 </div>
-              </div>
+              )}
 
               {/* Share Button */}
               <div className="mt-6">
