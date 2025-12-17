@@ -41,6 +41,34 @@ OUTPUT:
 - Ultra-realistic
 - The person must be immediately recognizable as the same individual
 - Show natural skin aging without consistent skincare
+
+POSE & POSITION LOCK (CRITICAL):
+The generated image MUST be an exact spatial and visual match to the reference image.
+
+ABSOLUTE REQUIREMENTS:
+- Identical head position
+- Identical face angle
+- Identical facial expression
+- Identical camera angle and distance
+- Identical framing and crop
+- Identical background
+- Identical lighting direction and intensity
+
+ONLY ALLOWED DIFFERENCES:
+- Skin texture and quality
+- Wrinkles and fine lines
+- Skin elasticity
+- Very subtle, natural aging-related hair changes
+
+NOT ALLOWED:
+- Any pose change
+- Any face orientation change
+- Any background change
+- Any lighting change
+- Any camera or crop change
+
+If any mismatch occurs, regenerate until outputs are perfectly aligned.
+The comparison must be pixel-aligned.
 `;
 
 const PROMPT_WITH_COLLAMIN = `
@@ -81,6 +109,34 @@ OUTPUT:
 - Ultra-realistic
 - The person must be immediately recognizable as the same individual
 - Same age as "without skincare" version, but with better maintained skin
+
+POSE & POSITION LOCK (CRITICAL):
+The generated image MUST be an exact spatial and visual match to the reference image.
+
+ABSOLUTE REQUIREMENTS:
+- Identical head position
+- Identical face angle
+- Identical facial expression
+- Identical camera angle and distance
+- Identical framing and crop
+- Identical background
+- Identical lighting direction and intensity
+
+ONLY ALLOWED DIFFERENCES:
+- Skin texture and quality
+- Wrinkles and fine lines
+- Skin elasticity
+- Very subtle, natural aging-related hair changes
+
+NOT ALLOWED:
+- Any pose change
+- Any face orientation change
+- Any background change
+- Any lighting change
+- Any camera or crop change
+
+If any mismatch occurs, regenerate until outputs are perfectly aligned.
+The comparison must be pixel-aligned.
 `;
 
 // -------------------- STORY COMPOSITION FUNCTION ----------------------
