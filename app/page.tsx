@@ -610,7 +610,7 @@ export default function Page() {
               onClick={handleGenerate}
               className="primary-btn"
             >
-              {loading ? "در حال ساخت پرتره زمستونی..." : "نشونم بده"}
+              {loading ? "در حال پیشبینی ۲۰ سال بعد..." : "نشونم بده"}
               {!loading && <span className="btn-shimmer" />}
             </button>
           </div>
