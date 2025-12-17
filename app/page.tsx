@@ -1080,7 +1080,6 @@ export default function Page() {
       
       {/* Floating Bottles Background */}
       <div className="floating-bottles-container">
-        {bottles.length > 0 && console.log("🍾 Rendering", bottles.length, "bottles")}
         {bottles.map((bottle) => (
           <img
             key={bottle.id}
