@@ -30,13 +30,25 @@ export default function Page() {
     const file = e.target.files?.[0] ?? null;
     if (!file) return;
 
-    setImage(file);
-    setWithoutCollamin(null);
-    setWithCollamin(null);
-    setSliderPosition(50);
-
+    // Check if image is portrait (vertical)
     const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Check if image is portrait (height > width)
+        if (img.width >= img.height) {
+          setError("لطفا یک تصویر عمودی (portrait) آپلود کنید. عرض تصویر باید کمتر از ارتفاع باشد.");
+          return;
+        }
+        setImage(file);
+        setError(null);
+        setWithoutCollamin(null);
+        setWithCollamin(null);
+        setSliderPosition(50);
+        setPreview(event.target?.result as string);
+      };
+      img.src = event.target?.result as string;
+    };
     reader.readAsDataURL(file);
   }
 
@@ -155,15 +167,23 @@ export default function Page() {
   }
 
   function handleDownload() {
-    if (!withCollamin) return;
+    if (!withCollamin || !withoutCollamin) return;
     
-    // Download the "with Collamin" image (the better future)
-    const a = document.createElement("a");
-    a.href = withCollamin;
-    a.download = "collamin-future-20-years.png";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    // Download both images
+    const downloadImage = (url: string, filename: string) => {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    // Download "with Collamin" first, then "without Collamin" after a short delay
+    downloadImage(withCollamin, "collamin-20-years-with.png");
+    setTimeout(() => {
+      downloadImage(withoutCollamin, "collamin-20-years-without.png");
+    }, 300);
   }
 
   async function handleShareToInstagram() {
@@ -591,7 +611,7 @@ export default function Page() {
         .comparison-images {
           position: relative;
           width: 100%;
-          padding-bottom: 56.25%; /* 16:9 aspect ratio */
+          padding-bottom: 133.33%; /* 3:4 portrait aspect ratio (vertical) */
           overflow: hidden;
         }
 
