@@ -862,16 +862,6 @@ export default function Page() {
                 style={{ cursor: "col-resize" }}
               >
                 <div className="comparison-images">
-                  {/* Left Image (Without Collamin) */}
-                  <img
-                    src={withoutCollamin}
-                    alt="Future without Collamin"
-                    className="comparison-image comparison-image-left"
-                    style={{
-                      clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                    }}
-                  />
-
                   {/* Right Image (With Collamin) */}
                   <img
                     src={withCollamin}
@@ -879,6 +869,16 @@ export default function Page() {
                     className="comparison-image comparison-image-right"
                     style={{
                       clipPath: `inset(0 0 0 ${sliderPosition}%)`,
+                    }}
+                  />
+
+                  {/* Left Image (Without Collamin) */}
+                  <img
+                    src={withoutCollamin}
+                    alt="Future without Collamin"
+                    className="comparison-image comparison-image-left"
+                    style={{
+                      clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
                     }}
                   />
 
@@ -898,8 +898,8 @@ export default function Page() {
 
                   {/* Labels */}
                   <div className="comparison-labels">
-                    <div className="comparison-label">۲۰ سال بعد — بدون کلامین</div>
                     <div className="comparison-label">۲۰ سال بعد — با کلامین</div>
+                    <div className="comparison-label">۲۰ سال بعد — بدون کلامین</div>
                   </div>
                 </div>
               </div>
