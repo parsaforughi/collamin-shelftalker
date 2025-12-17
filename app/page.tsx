@@ -258,6 +258,7 @@ export default function Page() {
 
   // Initialize floating bottles on mount
   useEffect(() => {
+    console.log("🍾 Initializing floating bottles...");
     const initialBottles = [
       { 
         id: 1, x: 15, y: 10, scale: 0.6, rotation: 0, rotationSpeed: 0.0003, 
@@ -291,6 +292,7 @@ export default function Page() {
       },
     ];
     setBottles(initialBottles);
+    console.log("🍾 Bottles initialized:", initialBottles.length);
   }, []);
 
   // Floating animation - natural drift with rotation
@@ -1068,6 +1070,7 @@ export default function Page() {
       
       {/* Floating Bottles Background */}
       <div className="floating-bottles-container">
+        {bottles.length > 0 && console.log("🍾 Rendering", bottles.length, "bottles")}
         {bottles.map((bottle) => (
           <img
             key={bottle.id}
