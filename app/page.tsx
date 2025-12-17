@@ -7,6 +7,7 @@ export default function Page() {
   const [preview, setPreview] = useState<string | null>(null);
   const [withoutCollamin, setWithoutCollamin] = useState<string | null>(null);
   const [withCollamin, setWithCollamin] = useState<string | null>(null);
+  const [storyComparison, setStoryComparison] = useState<string | null>(null);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +24,9 @@ export default function Page() {
     return () => {
       if (withoutCollamin) URL.revokeObjectURL(withoutCollamin);
       if (withCollamin) URL.revokeObjectURL(withCollamin);
+      if (storyComparison) URL.revokeObjectURL(storyComparison);
     };
-  }, [withoutCollamin, withCollamin]);
+  }, [withoutCollamin, withCollamin, storyComparison]);
 
   function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -40,12 +42,13 @@ export default function Page() {
           setError("لطفا یک تصویر عمودی (portrait) آپلود کنید. عرض تصویر باید کمتر از ارتفاع باشد.");
           return;
         }
-        setImage(file);
-        setError(null);
-        setWithoutCollamin(null);
-        setWithCollamin(null);
-        setSliderPosition(50);
-        setPreview(event.target?.result as string);
+    setImage(file);
+    setError(null);
+    setWithoutCollamin(null);
+    setWithCollamin(null);
+    setStoryComparison(null);
+    setSliderPosition(50);
+    setPreview(event.target?.result as string);
       };
       img.src = event.target?.result as string;
     };
@@ -98,6 +101,13 @@ export default function Page() {
         
         setWithoutCollamin(URL.createObjectURL(withoutBlob));
         setWithCollamin(URL.createObjectURL(withBlob));
+        
+        // Handle story comparison image if available
+        if (data.storyComparison) {
+          const storyBlob = base64ToBlob(data.storyComparison, "image/png");
+          setStoryComparison(URL.createObjectURL(storyBlob));
+        }
+        
         setSliderPosition(50);
         setLoading(false);
 
@@ -166,34 +176,51 @@ export default function Page() {
     document.addEventListener("touchend", handleMouseUp);
   }
 
-  function handleDownload() {
-    if (!withCollamin || !withoutCollamin) return;
-    
-    // Download both images
-    const downloadImage = (url: string, filename: string) => {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
+  function handleDownloadWithout() {
+    if (!withoutCollamin) return;
+    const a = document.createElement("a");
+    a.href = withoutCollamin;
+    a.download = "collamin-20-years-without.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
-    // Download "with Collamin" first, then "without Collamin" after a short delay
-    downloadImage(withCollamin, "collamin-20-years-with.png");
-    setTimeout(() => {
-      downloadImage(withoutCollamin, "collamin-20-years-without.png");
-    }, 300);
+  function handleDownloadWith() {
+    if (!withCollamin) return;
+    const a = document.createElement("a");
+    a.href = withCollamin;
+    a.download = "collamin-20-years-with.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function handleDownloadStory() {
+    if (!storyComparison) return;
+    const a = document.createElement("a");
+    a.href = storyComparison;
+    a.download = "collamin-story-comparison.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   async function handleShareToInstagram() {
-    if (!withCollamin) return;
+    if (!storyComparison) {
+      // If story image not available, download it for user
+      if (withoutCollamin && withCollamin) {
+        handleDownloadStory();
+        return;
+      }
+      return;
+    }
 
     try {
       // Convert blob URL to File
-      const response = await fetch(withCollamin);
+      const response = await fetch(storyComparison);
       const blob = await response.blob();
-      const file = new File([blob], "collamin-future.png", { type: "image/png" });
+      const file = new File([blob], "collamin-story.png", { type: "image/png" });
 
       // Check if Web Share API is available
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -202,13 +229,13 @@ export default function Page() {
           title: "آینده‌ام با کلامین",
         });
       } else {
-        // Fallback: Try to open Instagram app directly
-        window.location.href = "instagram://story-camera";
+        // Fallback: Auto-download the story image
+        handleDownloadStory();
       }
     } catch (err) {
       console.error("Error sharing:", err);
-      // Fallback: Open Instagram app
-      window.location.href = "instagram://story-camera";
+      // Fallback: Auto-download
+      handleDownloadStory();
     }
   }
 
@@ -953,20 +980,54 @@ export default function Page() {
                 />
               </div>
 
-              {/* Download and Share Buttons */}
-              <div className="mt-4 flex flex-col gap-3">
-                <button 
-                  className="download-btn" 
-                  onClick={handleDownload}
+              {/* Download Buttons Section */}
+              <div className="mt-6">
+                <h3
+                  className="text-center mb-3 text-lg font-semibold"
+                  style={{ color: "#245b4e" }}
                 >
-                  دانلود تصویر نهایی ⬇️
-                </button>
+                  دانلود تصاویر
+                </h3>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    className="download-btn" 
+                    onClick={handleDownloadWithout}
+                    disabled={!withoutCollamin}
+                  >
+                    دانلود عکس بدون کلامین ⬇️
+                  </button>
+                  <button 
+                    className="download-btn" 
+                    onClick={handleDownloadWith}
+                    disabled={!withCollamin}
+                  >
+                    دانلود عکس با کلامین ⬇️
+                  </button>
+                  <button 
+                    className="download-btn" 
+                    onClick={handleDownloadStory}
+                    disabled={!storyComparison}
+                  >
+                    دانلود نسخه استوری ⬇️
+                  </button>
+                </div>
+              </div>
+
+              {/* Share Button */}
+              <div className="mt-6">
                 <button
                   className="share-instagram-btn"
                   onClick={handleShareToInstagram}
+                  disabled={!storyComparison}
                 >
-                  📷 اشتراک در استوری اینستاگرام
+                  📷 اشتراک‌گذاری در استوری
                 </button>
+                <p
+                  className="text-center mt-2 text-xs"
+                  style={{ color: "#666", opacity: 0.8 }}
+                >
+                  این تصویر آماده انتشار در استوری است
+                </p>
               </div>
             </div>
           )}

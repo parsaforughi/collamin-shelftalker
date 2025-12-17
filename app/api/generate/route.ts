@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
+import { createCanvas, loadImage, registerFont } from "canvas";
+import { join } from "path";
 
 export const runtime = "nodejs";
 
@@ -79,6 +82,132 @@ OUTPUT:
 - The person must be immediately recognizable as the same individual
 - Same age as "without skincare" version, but with better maintained skin
 `;
+
+// -------------------- STORY COMPOSITION FUNCTION ----------------------
+
+async function composeStoryComparison(
+  withoutCollaminBase64: string,
+  withCollaminBase64: string
+): Promise<string> {
+  const width = 1080;
+  const height = 1920;
+  const halfHeight = height / 2;
+
+  // Load images from base64
+  const withoutCollaminBuffer = Buffer.from(withoutCollaminBase64, "base64");
+  const withCollaminBuffer = Buffer.from(withCollaminBase64, "base64");
+
+  // Resize images to fit top/bottom halves (maintaining aspect ratio, cropping to center)
+  const topImage = await sharp(withoutCollaminBuffer)
+    .resize(width, halfHeight, {
+      fit: "cover",
+      position: "center"
+    })
+    .toBuffer();
+
+  const bottomImage = await sharp(withCollaminBuffer)
+    .resize(width, halfHeight, {
+      fit: "cover",
+      position: "center"
+    })
+    .toBuffer();
+
+  // Create background with light medical green/neutral gray
+  const background = sharp({
+    create: {
+      width,
+      height,
+      channels: 3,
+      background: { r: 245, g: 250, b: 250 } // Very light neutral gray-green
+    }
+  })
+    .png();
+
+  // Composite images vertically with divider
+  const composite = await background
+    .composite([
+      { input: topImage, top: 0, left: 0 },
+      { input: bottomImage, top: halfHeight, left: 0 },
+      // Divider line (1px white line)
+      {
+        input: {
+          create: {
+            width,
+            height: 2,
+            channels: 3,
+            background: { r: 200, g: 200, b: 200 }
+          }
+        },
+        top: halfHeight - 1,
+        left: 0
+      }
+    ])
+    .toBuffer();
+
+  // Use canvas for text and logo overlay
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext("2d");
+
+  // Draw the composite image
+  const compositeImg = await loadImage(composite);
+  ctx.drawImage(compositeImg, 0, 0);
+
+  // Add rounded corners (soft frame)
+  const radius = 20;
+  const framePadding = 10;
+  ctx.strokeStyle = "rgba(200, 200, 200, 0.3)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(framePadding + radius, framePadding);
+  ctx.lineTo(width - framePadding - radius, framePadding);
+  ctx.quadraticCurveTo(width - framePadding, framePadding, width - framePadding, framePadding + radius);
+  ctx.lineTo(width - framePadding, height - framePadding - radius);
+  ctx.quadraticCurveTo(width - framePadding, height - framePadding, width - framePadding - radius, height - framePadding);
+  ctx.lineTo(framePadding + radius, height - framePadding);
+  ctx.quadraticCurveTo(framePadding, height - framePadding, framePadding, height - framePadding - radius);
+  ctx.lineTo(framePadding, framePadding + radius);
+  ctx.quadraticCurveTo(framePadding, framePadding, framePadding + radius, framePadding);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Text overlay settings (subtle, medical style)
+  ctx.fillStyle = "rgba(36, 91, 78, 0.85)"; // Medical green text
+  ctx.font = "32px system-ui, -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+
+  // Top text: "۲۰ سال بعد — بدون مراقبت مداوم"
+  ctx.fillText("۲۰ سال بعد — بدون مراقبت مداوم", width / 2, 40);
+
+  // Bottom text: "۲۰ سال بعد — با مراقبت مداوم"
+  ctx.fillText("۲۰ سال بعد — با مراقبت مداوم", width / 2, halfHeight + 40);
+
+  // Load and add Collamin logo at bottom center
+  try {
+    const fs = await import("fs/promises");
+    const logoPath = join(process.cwd(), "public", "collamin_logo.png");
+    const logoBuffer = await fs.readFile(logoPath);
+    const logo = await loadImage(logoBuffer);
+    
+    const logoSize = 60;
+    const logoX = width / 2 - logoSize / 2;
+    const logoY = height - 120;
+    
+    // Draw logo with opacity
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    ctx.globalAlpha = 1.0;
+  } catch (logoError) {
+    console.warn("Could not load logo:", logoError);
+    // Continue without logo
+  }
+
+  // Convert canvas to buffer and then to base64
+  const finalBuffer = canvas.toBuffer("image/png");
+  const finalBase64 = finalBuffer.toString("base64");
+
+  return finalBase64;
+}
 
 // -------------------- MAIN ROUTE ----------------------
 
@@ -188,11 +317,27 @@ export async function POST(req: NextRequest) {
 
     console.log("📥 Both images generated successfully");
 
-    // Return JSON with both images as base64
+    // Compose story comparison image
+    console.log("🎨 Composing story comparison image...");
+    let storyComparisonBase64: string | null = null;
+    
+    try {
+      storyComparisonBase64 = await composeStoryComparison(
+        withoutCollaminBase64,
+        withCollaminBase64
+      );
+      console.log("✅ Story comparison image composed successfully");
+    } catch (error: any) {
+      console.error("❌ Error composing story image:", error);
+      // Don't fail the request if story composition fails
+    }
+
+    // Return JSON with all images as base64
     return NextResponse.json({
       originalImage: userBase64,
       futureWithoutCollamin: withoutCollaminBase64,
-      futureWithCollamin: withCollaminBase64
+      futureWithCollamin: withCollaminBase64,
+      storyComparison: storyComparisonBase64
     }, {
       status: 200,
       headers: {
