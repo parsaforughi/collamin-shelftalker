@@ -335,13 +335,14 @@ export default function Page() {
           }
           
           // Very slow rotation (±2-4 degrees range)
+          let newRotationSpeed = bottle.rotationSpeed;
           newRotation += bottle.rotationSpeed * deltaTime * 1000;
           if (newRotation > 4) {
             newRotation = 4;
-            bottle.rotationSpeed = -Math.abs(bottle.rotationSpeed);
+            newRotationSpeed = -Math.abs(bottle.rotationSpeed);
           } else if (newRotation < -4) {
             newRotation = -4;
-            bottle.rotationSpeed = Math.abs(bottle.rotationSpeed);
+            newRotationSpeed = Math.abs(bottle.rotationSpeed);
           }
           
           // Ensure bottles stay in safe zones
@@ -356,6 +357,7 @@ export default function Page() {
             x: safeX, 
             y: newY, 
             rotation: newRotation,
+            rotationSpeed: newRotationSpeed,
             velocityX: newVelocityX,
             velocityY: newVelocityY
           };
