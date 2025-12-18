@@ -226,17 +226,8 @@ async function composeStoryComparison(
   ctx.closePath();
   ctx.stroke();
 
-  // Text overlay settings (subtle, medical style)
-  ctx.fillStyle = "rgba(36, 91, 78, 0.85)"; // Medical green text
-  ctx.font = "32px system-ui, -apple-system, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-
-  // Top text: "۲۰ سال بعد — بدون مراقبت مداوم"
-  ctx.fillText("۲۰ سال بعد — بدون مراقبت مداوم", width / 2, 40);
-
-  // Bottom text: "۲۰ سال بعد — با مراقبت مداوم"
-  ctx.fillText("۲۰ سال بعد — با مراقبت مداوم", width / 2, halfHeight + 40);
+  // Note: No forehead overlays, scan marks, or guide lines are added here.
+  // The images are composited cleanly without any visual artifacts.
 
   // Load Collamin logo for bottom-right overlays
   let logo: any = null;
@@ -252,14 +243,15 @@ async function composeStoryComparison(
   // Top image overlay: "Without" + logo at bottom-right
   if (logo) {
     const overlayPadding = 40; // Safe margin from edges
-    const logoSize = 50;
+    // Logo size: 4-6% of image width (1080px * 0.05 = 54px, using 55px)
+    const logoSize = Math.round(width * 0.051); // ~5.1% of width
     const textY = halfHeight - overlayPadding - logoSize - 25; // Text above logo
     const logoY = halfHeight - overlayPadding - logoSize;
     const logoX = width - overlayPadding - logoSize;
     
-    // Draw "Without" text
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.font = "24px system-ui, -apple-system, sans-serif";
+    // Draw "Without" text - English only, system-safe fonts
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = "bold 26px Arial, Helvetica, Inter, system-ui, -apple-system, sans-serif";
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
     ctx.fillText("Without", logoX + logoSize, textY);
@@ -277,9 +269,9 @@ async function composeStoryComparison(
     tempCtx.globalCompositeOperation = "destination-in";
     tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
     
-    // Draw the white-tinted logo onto main canvas
+    // Draw the white-tinted logo onto main canvas with 70-80% opacity
     ctx.save();
-    ctx.globalAlpha = 0.8;
+    ctx.globalAlpha = 0.75; // 75% opacity (within 70-80% range)
     ctx.drawImage(tempCanvas, logoX, logoY);
     ctx.restore();
   }
@@ -287,14 +279,15 @@ async function composeStoryComparison(
   // Bottom image overlay: "With" + logo at bottom-right
   if (logo) {
     const overlayPadding = 40; // Safe margin from edges
-    const logoSize = 50;
+    // Logo size: 4-6% of image width (1080px * 0.05 = 54px, using 55px)
+    const logoSize = Math.round(width * 0.051); // ~5.1% of width
     const textY = height - overlayPadding - logoSize - 25; // Text above logo
     const logoY = height - overlayPadding - logoSize;
     const logoX = width - overlayPadding - logoSize;
     
-    // Draw "With" text
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.font = "24px system-ui, -apple-system, sans-serif";
+    // Draw "With" text - English only, system-safe fonts
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = "bold 26px Arial, Helvetica, Inter, system-ui, -apple-system, sans-serif";
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
     ctx.fillText("With", logoX + logoSize, textY);
@@ -312,9 +305,9 @@ async function composeStoryComparison(
     tempCtx.globalCompositeOperation = "destination-in";
     tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
     
-    // Draw the white-tinted logo onto main canvas
+    // Draw the white-tinted logo onto main canvas with 70-80% opacity
     ctx.save();
-    ctx.globalAlpha = 0.8;
+    ctx.globalAlpha = 0.75; // 75% opacity (within 70-80% range)
     ctx.drawImage(tempCanvas, logoX, logoY);
     ctx.restore();
   }
