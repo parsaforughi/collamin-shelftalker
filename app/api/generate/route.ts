@@ -2,8 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { createCanvas, loadImage, registerFont } from "canvas";
 import { join } from "path";
+import { existsSync } from "fs";
 
 export const runtime = "nodejs";
+
+// Register Inter font at module level (once when module loads)
+try {
+  const fontPath = join(process.cwd(), "public", "fonts", "Inter-VariableFont_opsz,wght.ttf");
+  if (existsSync(fontPath)) {
+    registerFont(fontPath, { family: "Inter" });
+    console.log("✅ Inter font registered at module level");
+  } else {
+    console.warn("⚠️ Font file not found at:", fontPath);
+  }
+} catch (fontError) {
+  console.warn("⚠️ Could not register Inter font:", fontError);
+}
 
 // ---------------------- PROMPTS ------------------------
 
@@ -145,14 +159,6 @@ async function composeStoryComparison(
   withoutCollaminBase64: string,
   withCollaminBase64: string
 ): Promise<string> {
-  // Register Inter font before any canvas operations
-  try {
-    const fontPath = join(process.cwd(), "public", "fonts", "Inter-VariableFont_opsz,wght.ttf");
-    registerFont(fontPath, { family: "Inter" });
-  } catch (fontError) {
-    console.warn("Could not register Inter font:", fontError);
-  }
-
   const width = 1080;
   const height = 1920;
   const halfHeight = height / 2;
@@ -239,7 +245,14 @@ async function composeStoryComparison(
 
   // Draw text directly on canvas (not via sharp composite)
   ctx.save();
-  ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
+  // Explicitly set font - must be set every time before drawing text
+  try {
+    ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
+    console.log("📝 Using font:", ctx.font);
+  } catch (e) {
+    console.warn("⚠️ Font setting error:", e);
+    ctx.font = `${fontSize}px monospace`; // Fallback
+  }
   ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
