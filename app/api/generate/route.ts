@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { createCanvas, loadImage, registerFont } from "canvas";
 import { join } from "path";
+import { existsSync } from "node:fs";
 
 export const runtime = "nodejs";
 
