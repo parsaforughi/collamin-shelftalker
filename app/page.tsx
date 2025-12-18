@@ -49,6 +49,7 @@ export default function Page() {
     setWithCollamin(null);
     setStoryComparison(null);
     setSliderPosition(50);
+    setHasPlayedDiscoveryAnimation(false);
     setPreview(event.target?.result as string);
       };
       img.src = event.target?.result as string;
