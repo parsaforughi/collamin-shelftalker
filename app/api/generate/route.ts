@@ -240,7 +240,7 @@ async function composeStoryComparison(
   }
 
   const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.051); // ~5.1% of width
+  const logoSize = Math.round(width * 0.08); // ~8% of width (larger, more visible)
   const fontSize = 26;
   
   // Position text
