@@ -264,10 +264,14 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("Without", logoX + logoSize, textY);
     
-    // Draw white logo
+    // Draw white logo (use logo as mask, fill with white)
+    ctx.save();
     ctx.globalAlpha = 0.8;
     ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    ctx.globalAlpha = 1.0;
+    ctx.globalCompositeOperation = "source-in";
+    ctx.fillStyle = "white";
+    ctx.fillRect(logoX, logoY, logoSize, logoSize);
+    ctx.restore();
   }
 
   // Bottom image overlay: "With" + logo at bottom-right
@@ -285,10 +289,14 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("With", logoX + logoSize, textY);
     
-    // Draw white logo
+    // Draw white logo (use logo as mask, fill with white)
+    ctx.save();
     ctx.globalAlpha = 0.8;
     ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    ctx.globalAlpha = 1.0;
+    ctx.globalCompositeOperation = "source-in";
+    ctx.fillStyle = "white";
+    ctx.fillRect(logoX, logoY, logoSize, logoSize);
+    ctx.restore();
   }
 
   // Convert canvas to buffer and then to base64
