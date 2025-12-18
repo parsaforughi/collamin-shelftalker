@@ -78,6 +78,7 @@ export const statsTracker = {
     if (storyGenerated) {
       stats.storyImagesGenerated++;
     }
+    console.log("✅ Stats: Generation success recorded. Total:", stats.totalGenerations, "Successful:", stats.successfulGenerations);
   },
 
   // Record a failed generation
@@ -90,6 +91,7 @@ export const statsTracker = {
   recordUpload(userAgent?: string) {
     stats.totalUploads++;
     stats.totalPageViews++;
+    console.log("📊 Stats: Upload recorded. Total uploads:", stats.totalUploads);
     if (userAgent) {
       const ua = userAgent.toLowerCase();
       if (ua.includes('iphone') || ua.includes('ipad')) {
