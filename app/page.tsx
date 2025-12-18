@@ -11,6 +11,7 @@ export default function Page() {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasPlayedDiscoveryAnimation, setHasPlayedDiscoveryAnimation] = useState(false);
 
   // cleanup preview url
   useEffect(() => {
@@ -259,6 +260,27 @@ export default function Page() {
   useEffect(() => {
     document.body.style.overflowY = "auto";
   }, []);
+
+  // Discovery animation for comparison slider (run once when slider appears)
+  useEffect(() => {
+    if (!withoutCollamin || !withCollamin || hasPlayedDiscoveryAnimation) return;
+
+    setHasPlayedDiscoveryAnimation(true);
+    
+    // Animate: center (50%) → left (45%) → right (55%) → center (50%)
+    const duration = 1500; // 1.5 seconds total
+    const steps = [
+      { position: 45, delay: 0 },      // Move slightly left
+      { position: 55, delay: 500 },    // Move slightly right
+      { position: 50, delay: 1000 }    // Return to center
+    ];
+
+    steps.forEach((step) => {
+      setTimeout(() => {
+        setSliderPosition(step.position);
+      }, step.delay);
+    });
+  }, [withoutCollamin, withCollamin, hasPlayedDiscoveryAnimation]);
 
   // ❄ Canvas Snow Engine - DISABLED
   // useEffect(() => {

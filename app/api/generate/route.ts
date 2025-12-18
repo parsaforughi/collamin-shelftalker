@@ -238,24 +238,57 @@ async function composeStoryComparison(
   // Bottom text: "۲۰ سال بعد — با مراقبت مداوم"
   ctx.fillText("۲۰ سال بعد — با مراقبت مداوم", width / 2, halfHeight + 40);
 
-  // Load and add Collamin logo at bottom center
+  // Load Collamin logo for bottom-right overlays
+  let logo: any = null;
   try {
     const fs = await import("fs/promises");
-    const logoPath = join(process.cwd(), "public", "collamin_logo.png");
+    const logoPath = join(process.cwd(), "public", "collamin.png");
     const logoBuffer = await fs.readFile(logoPath);
-    const logo = await loadImage(logoBuffer);
-    
-    const logoSize = 60;
-    const logoX = width / 2 - logoSize / 2;
-    const logoY = height - 120;
-    
-    // Draw logo with opacity
-    ctx.globalAlpha = 0.45;
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    ctx.globalAlpha = 1.0;
+    logo = await loadImage(logoBuffer);
   } catch (logoError) {
     console.warn("Could not load logo:", logoError);
-    // Continue without logo
+  }
+
+  // Top image overlay: "Without" + logo at bottom-right
+  if (logo) {
+    const overlayPadding = 40; // Safe margin from edges
+    const logoSize = 50;
+    const textY = halfHeight - overlayPadding - logoSize - 25; // Text above logo
+    const logoY = halfHeight - overlayPadding - logoSize;
+    const logoX = width - overlayPadding - logoSize;
+    
+    // Draw "Without" text
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "24px system-ui, -apple-system, sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("Without", logoX + logoSize, textY);
+    
+    // Draw white logo
+    ctx.globalAlpha = 0.8;
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    ctx.globalAlpha = 1.0;
+  }
+
+  // Bottom image overlay: "With" + logo at bottom-right
+  if (logo) {
+    const overlayPadding = 40; // Safe margin from edges
+    const logoSize = 50;
+    const textY = height - overlayPadding - logoSize - 25; // Text above logo
+    const logoY = height - overlayPadding - logoSize;
+    const logoX = width - overlayPadding - logoSize;
+    
+    // Draw "With" text
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "24px system-ui, -apple-system, sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("With", logoX + logoSize, textY);
+    
+    // Draw white logo
+    ctx.globalAlpha = 0.8;
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    ctx.globalAlpha = 1.0;
   }
 
   // Convert canvas to buffer and then to base64
