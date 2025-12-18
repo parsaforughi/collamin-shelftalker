@@ -200,13 +200,120 @@ async function composeStoryComparison(
     ])
     .toBuffer();
 
-  // Use canvas for text and logo overlay
+  // Load Collamin logo for bottom-right overlays
+  let logo: any = null;
+  try {
+    const fs = await import("fs/promises");
+    const logoPath = join(process.cwd(), "public", "collamin.png");
+    const logoBuffer = await fs.readFile(logoPath);
+    logo = await loadImage(logoBuffer);
+  } catch (logoError) {
+    console.warn("Could not load logo:", logoError);
+  }
+
+  const overlayPadding = 40;
+  const logoSize = Math.round(width * 0.051); // ~5.1% of width
+  const fontSize = 26;
+  
+  // Create SVG overlays for text using sharp (SVG text renders properly)
+  const compositors: any[] = [];
+
+  // Top section: "Without" text
+  const topTextY = halfHeight - overlayPadding - logoSize - 25;
+  const topTextX = width - overlayPadding;
+  
+  // Create SVG for "Without" text
+  const withoutTextSvg = Buffer.from(`
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <text 
+        x="${topTextX}" 
+        y="${topTextY}" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="${fontSize}" 
+        font-weight="normal"
+        fill="rgba(255, 255, 255, 0.9)" 
+        text-anchor="end" 
+        dominant-baseline="text-before-edge"
+      >Without</text>
+    </svg>
+  `);
+  
+  compositors.push({
+    input: withoutTextSvg,
+    top: 0,
+    left: 0,
+    blend: "over"
+  });
+
+  // Bottom section: "With" text
+  const bottomTextY = height - overlayPadding - logoSize - 25;
+  const bottomTextX = width - overlayPadding;
+  
+  // Create SVG for "With" text
+  const withTextSvg = Buffer.from(`
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <text 
+        x="${bottomTextX}" 
+        y="${bottomTextY}" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="${fontSize}" 
+        font-weight="normal"
+        fill="rgba(255, 255, 255, 0.9)" 
+        text-anchor="end" 
+        dominant-baseline="text-before-edge"
+      >With</text>
+    </svg>
+  `);
+  
+  compositors.push({
+    input: withTextSvg,
+    top: 0,
+    left: 0,
+    blend: "over"
+  });
+
+  // Composite text overlays onto image
+  const compositeWithText = await sharp(composite)
+    .composite(compositors)
+    .toBuffer();
+
+  // Use canvas for logo overlays and rounded corners frame
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  // Draw the composite image
-  const compositeImg = await loadImage(composite);
+  // Draw the composite image with text
+  const compositeImg = await loadImage(compositeWithText);
   ctx.drawImage(compositeImg, 0, 0);
+
+  // Add logos with white tint using canvas
+  if (logo) {
+    const topLogoY = halfHeight - overlayPadding - logoSize;
+    const topLogoX = width - overlayPadding - logoSize;
+    const bottomLogoY = height - overlayPadding - logoSize;
+    const bottomLogoX = width - overlayPadding - logoSize;
+    
+    // Helper function to draw white-tinted logo
+    const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
+      const tempCanvas = createCanvas(size, size);
+      const tempCtx = tempCanvas.getContext("2d");
+      
+      tempCtx.fillStyle = "white";
+      tempCtx.fillRect(0, 0, size, size);
+      tempCtx.globalCompositeOperation = "destination-in";
+      tempCtx.drawImage(logo, 0, 0, size, size);
+      
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.drawImage(tempCanvas, x, y);
+      ctx.restore();
+    };
+    
+    // Draw top logo
+    drawWhiteLogo(topLogoX, topLogoY, logoSize, 0.75);
+    
+    // Draw bottom logo
+    drawWhiteLogo(bottomLogoX, bottomLogoY, logoSize, 0.75);
+  }
 
   // Add rounded corners (soft frame)
   const radius = 20;
@@ -225,92 +332,6 @@ async function composeStoryComparison(
   ctx.quadraticCurveTo(framePadding, framePadding, framePadding + radius, framePadding);
   ctx.closePath();
   ctx.stroke();
-
-  // Note: No forehead overlays, scan marks, or guide lines are added here.
-  // The images are composited cleanly without any visual artifacts.
-
-  // Load Collamin logo for bottom-right overlays
-  let logo: any = null;
-  try {
-    const fs = await import("fs/promises");
-    const logoPath = join(process.cwd(), "public", "collamin.png");
-    const logoBuffer = await fs.readFile(logoPath);
-    logo = await loadImage(logoBuffer);
-  } catch (logoError) {
-    console.warn("Could not load logo:", logoError);
-  }
-
-  // Top image overlay: "Without" + logo at bottom-right
-  if (logo) {
-    const overlayPadding = 40; // Safe margin from edges
-    // Logo size: 4-6% of image width (1080px * 0.05 = 54px, using 55px)
-    const logoSize = Math.round(width * 0.051); // ~5.1% of width
-    const textY = halfHeight - overlayPadding - logoSize - 25; // Text above logo
-    const logoY = halfHeight - overlayPadding - logoSize;
-    const logoX = width - overlayPadding - logoSize;
-    
-    // Draw "Without" text - English only, simple font that works in Node.js canvas
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = "26px sans-serif"; // Simple font that Node.js canvas can render
-    ctx.textAlign = "right";
-    ctx.textBaseline = "bottom";
-    ctx.fillText("Without", logoX + logoSize, textY);
-    
-    // Draw white logo using a simpler approach: create a white-tinted version
-    // Create temporary canvas for logo tinting
-    const tempCanvas = createCanvas(logoSize, logoSize);
-    const tempCtx = tempCanvas.getContext("2d");
-    
-    // Fill with white
-    tempCtx.fillStyle = "white";
-    tempCtx.fillRect(0, 0, logoSize, logoSize);
-    
-    // Use destination-in to mask with logo shape
-    tempCtx.globalCompositeOperation = "destination-in";
-    tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
-    
-    // Draw the white-tinted logo onto main canvas with 70-80% opacity
-    ctx.save();
-    ctx.globalAlpha = 0.75; // 75% opacity (within 70-80% range)
-    ctx.drawImage(tempCanvas, logoX, logoY);
-    ctx.restore();
-  }
-
-  // Bottom image overlay: "With" + logo at bottom-right
-  if (logo) {
-    const overlayPadding = 40; // Safe margin from edges
-    // Logo size: 4-6% of image width (1080px * 0.05 = 54px, using 55px)
-    const logoSize = Math.round(width * 0.051); // ~5.1% of width
-    const textY = height - overlayPadding - logoSize - 25; // Text above logo
-    const logoY = height - overlayPadding - logoSize;
-    const logoX = width - overlayPadding - logoSize;
-    
-    // Draw "With" text - English only, simple font that works in Node.js canvas
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = "26px sans-serif"; // Simple font that Node.js canvas can render
-    ctx.textAlign = "right";
-    ctx.textBaseline = "bottom";
-    ctx.fillText("With", logoX + logoSize, textY);
-    
-    // Draw white logo using a simpler approach: create a white-tinted version
-    // Create temporary canvas for logo tinting
-    const tempCanvas = createCanvas(logoSize, logoSize);
-    const tempCtx = tempCanvas.getContext("2d");
-    
-    // Fill with white
-    tempCtx.fillStyle = "white";
-    tempCtx.fillRect(0, 0, logoSize, logoSize);
-    
-    // Use destination-in to mask with logo shape
-    tempCtx.globalCompositeOperation = "destination-in";
-    tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
-    
-    // Draw the white-tinted logo onto main canvas with 70-80% opacity
-    ctx.save();
-    ctx.globalAlpha = 0.75; // 75% opacity (within 70-80% range)
-    ctx.drawImage(tempCanvas, logoX, logoY);
-    ctx.restore();
-  }
 
   // Convert canvas to buffer and then to base64
   const finalBuffer = canvas.toBuffer("image/png");
