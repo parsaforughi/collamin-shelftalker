@@ -147,7 +147,7 @@ async function composeStoryComparison(
 ): Promise<string> {
   // Register Inter font before any canvas operations
   try {
-    const fontPath = join(process.cwd(), "public", "fonts", "Inter-SemiBold.ttf");
+    const fontPath = join(process.cwd(), "public", "fonts", "Inter-VariableFont_opsz,wght.ttf");
     registerFont(fontPath, { family: "Inter" });
   } catch (fontError) {
     console.warn("Could not register Inter font:", fontError);
