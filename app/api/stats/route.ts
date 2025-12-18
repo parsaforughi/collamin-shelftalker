@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
+import { statsTracker } from "../stats-tracker";
 
 export async function GET() {
+  const stats = statsTracker.getStats();
+  
   return NextResponse.json({
-    totalGenerations: 0,
-    successfulGenerations: 0,
-    averageProcessingTime: 0,
-    status: "ok",
+    ...stats,
     timestamp: new Date().toISOString(),
+  }, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
   });
 }

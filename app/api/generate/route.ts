@@ -3,6 +3,7 @@ import sharp from "sharp";
 import { createCanvas, loadImage, registerFont } from "canvas";
 import { join } from "path";
 import { existsSync } from "node:fs";
+import { statsTracker } from "../stats-tracker";
 
 export const runtime = "nodejs";
 
@@ -454,6 +455,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!withoutCollaminBase64 || !withCollaminBase64) {
+      // Track failure
+      statsTracker.recordFailure();
+      
       return NextResponse.json(
         { 
           error: "Failed to generate one or both images",
@@ -480,6 +484,11 @@ export async function POST(req: NextRequest) {
       // Don't fail the request if story composition fails
     }
 
+    // Calculate processing time and track success
+    const processingTimeMs = Date.now() - startTime;
+    const storyGenerated = storyComparisonBase64 !== null;
+    statsTracker.recordSuccess(processingTimeMs, storyGenerated);
+
     // Return JSON with all images as base64
     return NextResponse.json({
       originalImage: userBase64,
@@ -495,6 +504,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("🔥 API ERROR:", err);
+    // Track failure for unexpected errors
+    statsTracker.recordFailure();
+    
     return NextResponse.json(
       { error: "Server crashed", details: String(err) },
       { status: 500 }
