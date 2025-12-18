@@ -264,13 +264,15 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("Without", logoX + logoSize, textY);
     
-    // Draw white logo (use logo as mask, fill with white)
+    // Draw white logo (fill white, then mask with logo shape)
     ctx.save();
     ctx.globalAlpha = 0.8;
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    ctx.globalCompositeOperation = "source-in";
+    // Fill with white first
     ctx.fillStyle = "white";
     ctx.fillRect(logoX, logoY, logoSize, logoSize);
+    // Use destination-in to keep only where logo has pixels (mask)
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
     ctx.restore();
   }
 
@@ -289,13 +291,15 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("With", logoX + logoSize, textY);
     
-    // Draw white logo (use logo as mask, fill with white)
+    // Draw white logo (fill white, then mask with logo shape)
     ctx.save();
     ctx.globalAlpha = 0.8;
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    ctx.globalCompositeOperation = "source-in";
+    // Fill with white first
     ctx.fillStyle = "white";
     ctx.fillRect(logoX, logoY, logoSize, logoSize);
+    // Use destination-in to keep only where logo has pixels (mask)
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
     ctx.restore();
   }
 
