@@ -264,17 +264,23 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("Without", logoX + logoSize, textY);
     
-    // Draw white logo (fill white, then mask with logo shape)
+    // Draw white logo using a simpler approach: create a white-tinted version
+    // Create temporary canvas for logo tinting
+    const tempCanvas = createCanvas(logoSize, logoSize);
+    const tempCtx = tempCanvas.getContext("2d");
+    
+    // Fill with white
+    tempCtx.fillStyle = "white";
+    tempCtx.fillRect(0, 0, logoSize, logoSize);
+    
+    // Use destination-in to mask with logo shape
+    tempCtx.globalCompositeOperation = "destination-in";
+    tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
+    
+    // Draw the white-tinted logo onto main canvas
     ctx.save();
     ctx.globalAlpha = 0.8;
-    // Fill with white first
-    ctx.fillStyle = "white";
-    ctx.fillRect(logoX, logoY, logoSize, logoSize);
-    // Use destination-in to keep only where logo has pixels (mask)
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    // Restore composite operation before restore()
-    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(tempCanvas, logoX, logoY);
     ctx.restore();
   }
 
@@ -293,17 +299,23 @@ async function composeStoryComparison(
     ctx.textBaseline = "bottom";
     ctx.fillText("With", logoX + logoSize, textY);
     
-    // Draw white logo (fill white, then mask with logo shape)
+    // Draw white logo using a simpler approach: create a white-tinted version
+    // Create temporary canvas for logo tinting
+    const tempCanvas = createCanvas(logoSize, logoSize);
+    const tempCtx = tempCanvas.getContext("2d");
+    
+    // Fill with white
+    tempCtx.fillStyle = "white";
+    tempCtx.fillRect(0, 0, logoSize, logoSize);
+    
+    // Use destination-in to mask with logo shape
+    tempCtx.globalCompositeOperation = "destination-in";
+    tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
+    
+    // Draw the white-tinted logo onto main canvas
     ctx.save();
     ctx.globalAlpha = 0.8;
-    // Fill with white first
-    ctx.fillStyle = "white";
-    ctx.fillRect(logoX, logoY, logoSize, logoSize);
-    // Use destination-in to keep only where logo has pixels (mask)
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-    // Restore composite operation before restore()
-    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(tempCanvas, logoX, logoY);
     ctx.restore();
   }
 
