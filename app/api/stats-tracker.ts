@@ -187,14 +187,6 @@ export const statsTracker = {
 
   // Get campaign analytics
   getCampaignAnalytics() {
-    // Update daily data for today's generation count
-    const today = new Date().toISOString().split('T')[0];
-    let dailyEntry = stats.dailyData.find(d => d.date === today);
-    if (!dailyEntry) {
-      dailyEntry = { date: today, uploads: 0, generations: 0, downloads: 0, storyDownloads: 0 };
-      stats.dailyData.push(dailyEntry);
-    }
-    dailyEntry.generations = stats.totalGenerations;
     const averageProcessingTime = stats.totalGenerations > 0
       ? stats.totalProcessingTime / stats.successfulGenerations / 1000
       : 0;
@@ -209,9 +201,9 @@ export const statsTracker = {
 
     // Generate daily data for last 7 days
     const dailyData = [];
-    const today = new Date();
+    const todayDate = new Date();
     for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
+      const date = new Date(todayDate);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
       
