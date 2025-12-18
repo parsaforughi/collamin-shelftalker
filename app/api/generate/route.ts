@@ -367,6 +367,7 @@ export async function POST(req: NextRequest) {
     // ---------------- GEMINI SETUP ----------------
 
     console.log("📡 Generating both future images…");
+    const startTime = Date.now();
 
     // Helper function to generate an image using REST API
     const generateFutureImage = async (promptText: string): Promise<string | null> => {
