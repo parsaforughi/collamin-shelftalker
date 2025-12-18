@@ -249,9 +249,9 @@ async function composeStoryComparison(
     const logoY = halfHeight - overlayPadding - logoSize;
     const logoX = width - overlayPadding - logoSize;
     
-    // Draw "Without" text - English only, system-safe fonts
+    // Draw "Without" text - English only, simple font that works in Node.js canvas
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = "bold 26px Arial, Helvetica, Inter, system-ui, -apple-system, sans-serif";
+    ctx.font = "26px sans-serif"; // Simple font that Node.js canvas can render
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
     ctx.fillText("Without", logoX + logoSize, textY);
@@ -285,9 +285,9 @@ async function composeStoryComparison(
     const logoY = height - overlayPadding - logoSize;
     const logoX = width - overlayPadding - logoSize;
     
-    // Draw "With" text - English only, system-safe fonts
+    // Draw "With" text - English only, simple font that works in Node.js canvas
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = "bold 26px Arial, Helvetica, Inter, system-ui, -apple-system, sans-serif";
+    ctx.font = "26px sans-serif"; // Simple font that Node.js canvas can render
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
     ctx.fillText("With", logoX + logoSize, textY);
