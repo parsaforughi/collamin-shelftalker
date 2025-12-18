@@ -333,6 +333,10 @@ async function composeStoryComparison(
 export async function POST(req: NextRequest) {
   try {
     console.log("🔵 /api/generate called");
+    
+    // Track upload
+    const userAgent = req.headers.get("user-agent") || undefined;
+    statsTracker.recordUpload(userAgent);
 
     const form = await req.formData();
     const userFile = form.get("image");
