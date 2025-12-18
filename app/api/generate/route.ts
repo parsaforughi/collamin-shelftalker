@@ -215,52 +215,52 @@ async function composeStoryComparison(
   const logoSize = Math.round(width * 0.051); // ~5.1% of width
   const fontSize = 26;
   
-  // Helper function to create text as image using canvas
-  const createTextImage = (text: string, textWidth: number, textHeight: number): Buffer => {
-    const textCanvas = createCanvas(textWidth, textHeight);
-    const textCtx = textCanvas.getContext("2d");
-    
-    // Try to use a simple font - canvas in Node.js should have basic fonts
-    // If this doesn't work, the text will still render but may look different
-    try {
-      textCtx.font = `${fontSize}px sans-serif`;
-    } catch {
-      textCtx.font = `${fontSize}px monospace`;
-    }
-    
-    textCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    textCtx.textAlign = "right";
-    textCtx.textBaseline = "top";
-    textCtx.fillText(text, textWidth, 0);
-    
-    return textCanvas.toBuffer("image/png");
-  };
-
-  // Create text images
-  const textWidth = 150;
-  const textHeight = 35;
-  const withoutTextImg = createTextImage("Without", textWidth, textHeight);
-  const withTextImg = createTextImage("With", textWidth, textHeight);
-
   // Position text
   const topTextY = halfHeight - overlayPadding - logoSize - 25;
-  const topTextX = width - overlayPadding - textWidth;
+  const topTextX = width - overlayPadding;
   const bottomTextY = height - overlayPadding - logoSize - 25;
-  const bottomTextX = width - overlayPadding - textWidth;
+  const bottomTextX = width - overlayPadding;
 
-  // Composite text overlays onto image
+  // Create text using SVG with embedded font data
+  // Sharp should handle SVG text rendering better than canvas
+  const textWidth = 150;
+  const textHeight = 40;
+  
+  // Create SVG with text - sharp will render this properly
+  const createTextSvg = (text: string, x: number, y: number): Buffer => {
+    const svg = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <text 
+          x="${x}" 
+          y="${y}" 
+          font-family="Arial, Helvetica, sans-serif" 
+          font-size="${fontSize}" 
+          font-weight="normal"
+          fill="rgba(255, 255, 255, 0.9)" 
+          text-anchor="end" 
+          dominant-baseline="middle"
+        >${text}</text>
+      </svg>
+    `;
+    return Buffer.from(svg);
+  };
+
+  const withoutTextSvg = createTextSvg("Without", topTextX, topTextY);
+  const withTextSvg = createTextSvg("With", bottomTextX, bottomTextY);
+
+  // Composite text overlays onto image using SVG
   const compositeWithText = await sharp(composite)
     .composite([
       {
-        input: withoutTextImg,
-        top: topTextY,
-        left: topTextX,
+        input: withoutTextSvg,
+        top: 0,
+        left: 0,
         blend: "over"
       },
       {
-        input: withTextImg,
-        top: bottomTextY,
-        left: bottomTextX,
+        input: withTextSvg,
+        top: 0,
+        left: 0,
         blend: "over"
       }
     ])
