@@ -237,12 +237,14 @@ async function composeStoryComparison(
     const textCanvas = createCanvas(textWidth, textHeight);
     const textCtx = textCanvas.getContext("2d");
     
-    // Use registered Inter font with weight 600 (SemiBold)
-    textCtx.font = `600 ${fontSize}px "Inter"`;
+    // Explicitly set font and style before drawing text
+    textCtx.save();
+    textCtx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
     textCtx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
     textCtx.textAlign = "right";
     textCtx.textBaseline = "middle";
     textCtx.fillText(text, textWidth - 10, textHeight / 2);
+    textCtx.restore();
     
     return textCanvas.toBuffer("image/png");
   };
