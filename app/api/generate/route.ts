@@ -145,6 +145,14 @@ async function composeStoryComparison(
   withoutCollaminBase64: string,
   withCollaminBase64: string
 ): Promise<string> {
+  // Register Inter font before any canvas operations
+  try {
+    const fontPath = join(process.cwd(), "public", "fonts", "Inter-SemiBold.ttf");
+    registerFont(fontPath, { family: "Inter" });
+  } catch (fontError) {
+    console.warn("Could not register Inter font:", fontError);
+  }
+
   const width = 1080;
   const height = 1920;
   const halfHeight = height / 2;
@@ -229,9 +237,9 @@ async function composeStoryComparison(
     const textCanvas = createCanvas(textWidth, textHeight);
     const textCtx = textCanvas.getContext("2d");
     
-    // Use monospace font which is always available in Node.js canvas
-    textCtx.font = `${fontSize}px monospace`;
-    textCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    // Use registered Inter font with weight 600 (SemiBold)
+    textCtx.font = `600 ${fontSize}px "Inter"`;
+    textCtx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
     textCtx.textAlign = "right";
     textCtx.textBaseline = "middle";
     textCtx.fillText(text, textWidth - 10, textHeight / 2);
