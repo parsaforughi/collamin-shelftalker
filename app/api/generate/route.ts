@@ -229,54 +229,28 @@ async function composeStoryComparison(
   const bottomTextY = height - overlayPadding - logoSize - 25;
   const bottomTextX = width - overlayPadding;
 
-  // Create text images using canvas with monospace font (always available in Node.js)
-  const textWidth = 150;
-  const textHeight = 40;
-  
-  const createTextImage = (text: string): Buffer => {
-    const textCanvas = createCanvas(textWidth, textHeight);
-    const textCtx = textCanvas.getContext("2d");
-    
-    // Explicitly set font and style before drawing text
-    textCtx.save();
-    textCtx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
-    textCtx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
-    textCtx.textAlign = "right";
-    textCtx.textBaseline = "middle";
-    textCtx.fillText(text, textWidth - 10, textHeight / 2);
-    textCtx.restore();
-    
-    return textCanvas.toBuffer("image/png");
-  };
-
-  const withoutTextImg = createTextImage("Without");
-  const withTextImg = createTextImage("With");
-
-  // Composite text overlays onto image
-  const compositeWithText = await sharp(composite)
-    .composite([
-      {
-        input: withoutTextImg,
-        top: topTextY - textHeight / 2,
-        left: topTextX - textWidth,
-        blend: "over"
-      },
-      {
-        input: withTextImg,
-        top: bottomTextY - textHeight / 2,
-        left: bottomTextX - textWidth,
-        blend: "over"
-      }
-    ])
-    .toBuffer();
-
-  // Use canvas for logo overlays and rounded corners frame
+  // Use canvas for everything: composite image, text, logo, and rounded corners frame
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  // Draw the composite image with text
-  const compositeImg = await loadImage(compositeWithText);
+  // Draw the composite image (without text)
+  const compositeImg = await loadImage(composite);
   ctx.drawImage(compositeImg, 0, 0);
+
+  // Draw text directly on canvas (not via sharp composite)
+  ctx.save();
+  ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
+  ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  
+  // Draw "Without" text
+  ctx.fillText("Without", topTextX, topTextY);
+  
+  // Draw "With" text
+  ctx.fillText("With", bottomTextX, bottomTextY);
+  
+  ctx.restore();
 
   // Add logos with white tint using canvas
   if (logo) {
