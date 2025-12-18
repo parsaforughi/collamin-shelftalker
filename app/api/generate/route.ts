@@ -337,6 +337,10 @@ export async function POST(req: NextRequest) {
     // Track upload
     const userAgent = req.headers.get("user-agent") || undefined;
     statsTracker.recordUpload(userAgent);
+    console.log("📊 After upload, current stats:", JSON.stringify({
+      totalUploads: statsTracker.getCampaignAnalytics().overview.totalUploads,
+      totalGenerations: statsTracker.getStats().totalGenerations,
+    }));
 
     const form = await req.formData();
     const userFile = form.get("image");
@@ -492,7 +496,10 @@ export async function POST(req: NextRequest) {
     // Calculate processing time and track success
     const processingTimeMs = Date.now() - startTime;
     const storyGenerated = storyComparisonBase64 !== null;
+    console.log("⏱️ Processing time:", processingTimeMs, "ms");
+    console.log("📊 Story generated:", storyGenerated);
     statsTracker.recordSuccess(processingTimeMs, storyGenerated);
+    console.log("✅ Success tracked. Current stats:", JSON.stringify(statsTracker.getStats()));
 
     // Return JSON with all images as base64
     return NextResponse.json({
