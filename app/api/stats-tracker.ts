@@ -81,6 +81,14 @@ export const statsTracker = {
     if (storyGenerated) {
       stats.storyImagesGenerated++;
     }
+    // Update daily data
+    const today = new Date().toISOString().split('T')[0];
+    let dailyEntry = stats.dailyData.find(d => d.date === today);
+    if (!dailyEntry) {
+      dailyEntry = { date: today, uploads: 0, generations: 0, downloads: 0, storyDownloads: 0 };
+      stats.dailyData.push(dailyEntry);
+    }
+    dailyEntry.generations = stats.totalGenerations;
     saveStats(stats);
     console.log("✅ Stats: Generation success recorded. Total:", stats.totalGenerations, "Successful:", stats.successfulGenerations);
   },
