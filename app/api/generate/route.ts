@@ -273,6 +273,8 @@ async function composeStoryComparison(
     // Use destination-in to keep only where logo has pixels (mask)
     ctx.globalCompositeOperation = "destination-in";
     ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    // Restore composite operation before restore()
+    ctx.globalCompositeOperation = "source-over";
     ctx.restore();
   }
 
@@ -300,6 +302,8 @@ async function composeStoryComparison(
     // Use destination-in to keep only where logo has pixels (mask)
     ctx.globalCompositeOperation = "destination-in";
     ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    // Restore composite operation before restore()
+    ctx.globalCompositeOperation = "source-over";
     ctx.restore();
   }
 
