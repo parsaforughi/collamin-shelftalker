@@ -421,14 +421,44 @@ export async function POST(req: NextRequest) {
     };
 
     // Generate both images
-    const [withoutCollaminBase64, withCollaminBase64] = await Promise.all([
-      generateFutureImage(PROMPT_WITHOUT_COLLAMIN),
-      generateFutureImage(PROMPT_WITH_COLLAMIN)
-    ]);
+    let withoutCollaminBase64: string | null = null;
+    let withCollaminBase64: string | null = null;
+    let generationError: string | null = null;
+
+    try {
+      const results = await Promise.allSettled([
+        generateFutureImage(PROMPT_WITHOUT_COLLAMIN),
+        generateFutureImage(PROMPT_WITH_COLLAMIN)
+      ]);
+
+      if (results[0].status === "fulfilled") {
+        withoutCollaminBase64 = results[0].value;
+        console.log("✅ Without Collamin image generated:", withoutCollaminBase64 ? "SUCCESS" : "NULL");
+      } else {
+        console.error("❌ Without Collamin generation failed:", results[0].reason);
+        generationError = `Without Collamin failed: ${results[0].reason?.message || String(results[0].reason)}`;
+      }
+
+      if (results[1].status === "fulfilled") {
+        withCollaminBase64 = results[1].value;
+        console.log("✅ With Collamin image generated:", withCollaminBase64 ? "SUCCESS" : "NULL");
+      } else {
+        console.error("❌ With Collamin generation failed:", results[1].reason);
+        generationError = generationError 
+          ? `${generationError}; With Collamin failed: ${results[1].reason?.message || String(results[1].reason)}`
+          : `With Collamin failed: ${results[1].reason?.message || String(results[1].reason)}`;
+      }
+    } catch (error: any) {
+      console.error("❌ Generation error:", error);
+      generationError = error?.message || String(error);
+    }
 
     if (!withoutCollaminBase64 || !withCollaminBase64) {
       return NextResponse.json(
-        { error: "Failed to generate one or both images" },
+        { 
+          error: "Failed to generate one or both images",
+          details: generationError || "Unknown error"
+        },
         { status: 500 }
       );
     }
