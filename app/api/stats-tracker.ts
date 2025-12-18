@@ -1,4 +1,7 @@
-// In-memory stats tracker for real-time statistics
+// Stats tracker with file-based persistence for real-time statistics
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+
 interface StatsData {
   totalGenerations: number;
   successfulGenerations: number;
@@ -78,6 +81,7 @@ export const statsTracker = {
     if (storyGenerated) {
       stats.storyImagesGenerated++;
     }
+    saveStats(stats);
     console.log("✅ Stats: Generation success recorded. Total:", stats.totalGenerations, "Successful:", stats.successfulGenerations);
   },
 
@@ -85,6 +89,7 @@ export const statsTracker = {
   recordFailure() {
     stats.totalGenerations++;
     stats.failedGenerations++;
+    saveStats(stats);
     console.log("❌ Stats: Generation failure recorded. Total:", stats.totalGenerations, "Failed:", stats.failedGenerations);
   },
 
@@ -103,6 +108,15 @@ export const statsTracker = {
         stats.deviceBreakdown.desktop++;
       }
     }
+    // Update daily data
+    const today = new Date().toISOString().split('T')[0];
+    let dailyEntry = stats.dailyData.find(d => d.date === today);
+    if (!dailyEntry) {
+      dailyEntry = { date: today, uploads: 0, generations: 0, downloads: 0, storyDownloads: 0 };
+      stats.dailyData.push(dailyEntry);
+    }
+    dailyEntry.uploads++;
+    saveStats(stats);
   },
 
   // Record download event
@@ -117,6 +131,19 @@ export const statsTracker = {
     } else {
       stats.individualImageDownloads++;
     }
+    
+    // Update daily data
+    const today = new Date().toISOString().split('T')[0];
+    let dailyEntry = stats.dailyData.find(d => d.date === today);
+    if (!dailyEntry) {
+      dailyEntry = { date: today, uploads: 0, generations: 0, downloads: 0, storyDownloads: 0 };
+      stats.dailyData.push(dailyEntry);
+    }
+    dailyEntry.downloads++;
+    if (type === 'storyComparison') {
+      dailyEntry.storyDownloads++;
+    }
+    saveStats(stats);
   },
 
   // Record page view
@@ -145,8 +172,21 @@ export const statsTracker = {
     };
   },
 
+  // Reload stats from file (in case of external updates)
+  reload() {
+    stats = loadStats();
+  },
+
   // Get campaign analytics
   getCampaignAnalytics() {
+    // Update daily data for today's generation count
+    const today = new Date().toISOString().split('T')[0];
+    let dailyEntry = stats.dailyData.find(d => d.date === today);
+    if (!dailyEntry) {
+      dailyEntry = { date: today, uploads: 0, generations: 0, downloads: 0, storyDownloads: 0 };
+      stats.dailyData.push(dailyEntry);
+    }
+    dailyEntry.generations = stats.totalGenerations;
     const averageProcessingTime = stats.totalGenerations > 0
       ? stats.totalProcessingTime / stats.successfulGenerations / 1000
       : 0;
