@@ -221,46 +221,40 @@ async function composeStoryComparison(
   const bottomTextY = height - overlayPadding - logoSize - 25;
   const bottomTextX = width - overlayPadding;
 
-  // Create text using SVG with embedded font data
-  // Sharp should handle SVG text rendering better than canvas
+  // Create text images using canvas with monospace font (always available in Node.js)
   const textWidth = 150;
   const textHeight = 40;
   
-  // Create SVG with text - sharp will render this properly
-  const createTextSvg = (text: string, x: number, y: number): Buffer => {
-    const svg = `
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <text 
-          x="${x}" 
-          y="${y}" 
-          font-family="Arial, Helvetica, sans-serif" 
-          font-size="${fontSize}" 
-          font-weight="normal"
-          fill="rgba(255, 255, 255, 0.9)" 
-          text-anchor="end" 
-          dominant-baseline="middle"
-        >${text}</text>
-      </svg>
-    `;
-    return Buffer.from(svg);
+  const createTextImage = (text: string): Buffer => {
+    const textCanvas = createCanvas(textWidth, textHeight);
+    const textCtx = textCanvas.getContext("2d");
+    
+    // Use monospace font which is always available in Node.js canvas
+    textCtx.font = `${fontSize}px monospace`;
+    textCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    textCtx.textAlign = "right";
+    textCtx.textBaseline = "middle";
+    textCtx.fillText(text, textWidth - 10, textHeight / 2);
+    
+    return textCanvas.toBuffer("image/png");
   };
 
-  const withoutTextSvg = createTextSvg("Without", topTextX, topTextY);
-  const withTextSvg = createTextSvg("With", bottomTextX, bottomTextY);
+  const withoutTextImg = createTextImage("Without");
+  const withTextImg = createTextImage("With");
 
-  // Composite text overlays onto image using SVG
+  // Composite text overlays onto image
   const compositeWithText = await sharp(composite)
     .composite([
       {
-        input: withoutTextSvg,
-        top: 0,
-        left: 0,
+        input: withoutTextImg,
+        top: topTextY - textHeight / 2,
+        left: topTextX - textWidth,
         blend: "over"
       },
       {
-        input: withTextSvg,
-        top: 0,
-        left: 0,
+        input: withTextImg,
+        top: bottomTextY - textHeight / 2,
+        left: bottomTextX - textWidth,
         blend: "over"
       }
     ])
