@@ -257,10 +257,10 @@ async function composeStoryComparison(
   const compositeImg = await loadImage(composite);
   ctx.drawImage(compositeImg, 0, 0);
 
-  // Draw text directly on canvas (not via sharp composite)
+  // Draw text directly on canvas (not via sharp composite) - elegant and refined
   ctx.save();
-  ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (SemiBold)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // ~80% opacity
+  ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; // Slightly higher opacity for better readability
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   
@@ -302,11 +302,11 @@ async function composeStoryComparison(
     drawWhiteLogo(bottomLogoX, bottomLogoY, logoSize, 0.75);
   }
 
-  // Add rounded corners (soft frame)
+  // Add rounded corners (soft, thin frame - elegant for mobile)
   const radius = 20;
-  const framePadding = 10;
-  ctx.strokeStyle = "rgba(200, 200, 200, 0.3)";
-  ctx.lineWidth = 2;
+  const framePadding = 8; // Reduced padding for cleaner look
+  ctx.strokeStyle = "rgba(200, 200, 200, 0.2)"; // More subtle, refined
+  ctx.lineWidth = 1; // Thinner line for elegant look on mobile
   ctx.beginPath();
   ctx.moveTo(framePadding + radius, framePadding);
   ctx.lineTo(width - framePadding - radius, framePadding);
