@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "IceBall Winter Portrait Generator",
-  description: "Upload your portrait and let NanoBanana craft a cinematic Ice Ball winter campaign frame."
+  title: "Collamin Shelftalker",
+  description: "Upload your portrait and see how your skin will look in 20 years with and without Collamin skincare."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

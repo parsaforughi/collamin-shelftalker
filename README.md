@@ -1,11 +1,13 @@
-# IceBall Winter Portrait Generator
+# Collamin Shelftalker
 
-A minimalist Next.js 14 + TailwindCSS experience that pairs your portrait with Luxirana's Ice Ball reference and relays both to the NanoBanana API for cinematic winter campaign imagery.
+A Next.js 14 application that generates realistic aging projections showing how your skin will look in 20 years with and without Collamin skincare using Google Gemini AI.
 
 ## Features
-- App Router architecture with a custom API route that streams portraits to NanoBanana alongside the included Ice Ball reference asset.
-- Calm white interface inspired by Apple aesthetics, Framer Motion snowflake loader, and responsive layout for mobile + desktop.
-- Ready for Vercel deployment with TypeScript, TailwindCSS, and environment-driven configuration.
+- App Router architecture with custom API route for Google Gemini image generation
+- Calm, medical-grade interface with Persian (RTL) support
+- Side-by-side comparison slider showing aging projections
+- Story-ready vertical comparison image generation
+- Responsive layout for mobile + desktop
 
 ## Getting Started
 1. **Install dependencies**
@@ -13,9 +15,9 @@ A minimalist Next.js 14 + TailwindCSS experience that pairs your portrait with L
    npm install
    ```
 2. **Configure environment**
-   Copy the template and update the NanoBanana key if needed:
+   Set your Google Gemini API key:
    ```bash
-   cp .env.local.example .env.local
+   GEMINI_API_KEY=your_api_key_here
    ```
 3. **Run the dev server**
    ```bash
@@ -24,20 +26,21 @@ A minimalist Next.js 14 + TailwindCSS experience that pairs your portrait with L
    Visit `http://localhost:3000` and upload a portrait.
 
 ## Deployment
-- Push the project to GitHub and deploy with [Vercel](https://vercel.com/). The included settings (App Router + `/app/api/generate`) work out-of-the-box.
-- Set the `NANOBANANA_KEY` secret in the Vercel dashboard.
-- Target domain: `iceball.luxirana.ir` (configure as a custom domain once the Vercel project is live).
+- Push the project to GitHub and deploy with [Vercel](https://vercel.com/).
+- Set the `GEMINI_API_KEY` secret in the Vercel dashboard.
 
 ## Project Structure
 ```
 app/
   layout.tsx        // Global layout & fonts
-  page.tsx          // Upload UI + Framer Motion interactions
-  api/generate/     // Serverless route calling NanoBanana
+  page.tsx          // Upload UI + comparison slider
+  api/generate/     // Serverless route calling Google Gemini
 public/
-  iceball_ref.png   // Ice Ball reference asset sent to the API
+  collamin_logo.png // Collamin logo asset
+  collamin-bottle.webp // Product image
 ```
 
 ## Notes
-- The API route validates uploads, injects the provided cinematic prompt, and attaches the bundled reference before calling NanoBanana.
-- For production, consider rate limiting and stronger file validation (file type/size) before forwarding to the provider.
+- The API route generates two images: one showing natural aging without skincare, and one with Collamin skincare
+- A third vertical story image is composed for Instagram Stories
+- Portrait orientation images only (height > width)

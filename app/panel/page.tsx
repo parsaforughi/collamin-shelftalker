@@ -102,10 +102,10 @@ export default function Home() {
             className="w-[90%] max-w-sm rounded-xl shadow-xl border border-white"
           />
 
-          {/* Download Button – clean, luxury, IceBall style */}
+          {/* Download Button – clean, luxury, Collamin style */}
           <a
             href={generated}
-            download="iceball_result.png"
+            download="collamin_result.png"
             className="mt-6 px-8 py-4 bg-[#0b74d9] text-white font-semibold rounded-xl shadow-md hover:bg-[#005bbb] transition-all"
           >
             ⬇️ دانلود تصویر نهایی
