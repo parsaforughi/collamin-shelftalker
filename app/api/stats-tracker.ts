@@ -85,6 +85,7 @@ export const statsTracker = {
   recordFailure() {
     stats.totalGenerations++;
     stats.failedGenerations++;
+    console.log("❌ Stats: Generation failure recorded. Total:", stats.totalGenerations, "Failed:", stats.failedGenerations);
   },
 
   // Record upload event
