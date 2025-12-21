@@ -279,8 +279,18 @@ async function composeStoryComparison(
 
   // Add logos with white tint using canvas (left side)
   if (logo) {
-    // Helper function to draw white-tinted logo
+    // Helper function to draw white-tinted logo with background for visibility
     const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
+      // First, draw a dark semi-transparent background behind logo for contrast
+      const padding = Math.round(size * 0.15); // 15% padding around logo
+      ctx.save();
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Dark background with 50% opacity
+      ctx.beginPath();
+      ctx.roundRect(x - padding, y - padding, size + padding * 2, size + padding * 2, 8);
+      ctx.fill();
+      ctx.restore();
+      
+      // Draw white-tinted logo
       const tempCanvas = createCanvas(size, size);
       const tempCtx = tempCanvas.getContext("2d");
       
