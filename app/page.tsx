@@ -765,14 +765,21 @@ export default function Page() {
 
         .comparison-labels {
           position: absolute;
-          top: 12px;
+          top: 8px;
           left: 0;
           right: 0;
           display: flex;
           justify-content: space-between;
-          padding: 0 16px;
+          padding: 0 8px;
           z-index: 22;
           pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+          .comparison-labels {
+            top: 12px;
+            padding: 0 16px;
+          }
         }
 
         .comparison-label {
