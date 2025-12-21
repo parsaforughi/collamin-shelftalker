@@ -1000,7 +1000,7 @@ export default function Page() {
 
                   {/* Labels */}
                   <div className="comparison-labels">
-                    <div className="comparison-label">بی کلامین</div>
+                    <div className="comparison-label">بدون کلامین</div>
                     <div className="comparison-label">با کلامین</div>
                   </div>
                 </div>
