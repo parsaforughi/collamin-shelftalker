@@ -40,37 +40,101 @@ interface StatsData {
   lastResetTime: string;
 }
 
-let stats: StatsData = {
-  totalGenerations: 0,
-  successfulGenerations: 0,
-  failedGenerations: 0,
-  totalProcessingTime: 0,
-  storyImagesGenerated: 0,
-  totalUploads: 0,
-  totalDownloads: 0,
-  storyDownloads: 0,
-  individualImageDownloads: 0,
-  totalPageViews: 0,
-  uniqueVisitors: 0,
-  rejectionCounts: {
-    poseMismatch: 0,
-    lightingMismatch: 0,
-    artifacts: 0,
-  },
-  deviceBreakdown: {
-    ios: 0,
-    android: 0,
-    desktop: 0,
-  },
-  downloadByType: {
-    withoutCollamin: 0,
-    withCollamin: 0,
-    storyComparison: 0,
-  },
-  dailyData: [],
-  hourlyDownloadData: {},
-  lastResetTime: new Date().toISOString(),
-};
+
+// Load stats from file or initialize
+function loadStats(): StatsData {
+  try {
+    if (existsSync(STATS_FILE)) {
+      const fileData = readFileSync(STATS_FILE, "utf-8");
+      const loaded = JSON.parse(fileData);
+      // Ensure all fields exist (backward compatibility)
+      return {
+        totalGenerations: loaded.totalGenerations || 0,
+        successfulGenerations: loaded.successfulGenerations || 0,
+        failedGenerations: loaded.failedGenerations || 0,
+        totalProcessingTime: loaded.totalProcessingTime || 0,
+        storyImagesGenerated: loaded.storyImagesGenerated || 0,
+        totalUploads: loaded.totalUploads || 0,
+        totalDownloads: loaded.totalDownloads || 0,
+        storyDownloads: loaded.storyDownloads || 0,
+        individualImageDownloads: loaded.individualImageDownloads || 0,
+        totalPageViews: loaded.totalPageViews || 0,
+        uniqueVisitors: loaded.uniqueVisitors || 0,
+        rejectionCounts: loaded.rejectionCounts || {
+          poseMismatch: 0,
+          lightingMismatch: 0,
+          artifacts: 0,
+        },
+        deviceBreakdown: loaded.deviceBreakdown || {
+          ios: 0,
+          android: 0,
+          desktop: 0,
+        },
+        downloadByType: loaded.downloadByType || {
+          withoutCollamin: 0,
+          withCollamin: 0,
+          storyComparison: 0,
+        },
+        dailyData: loaded.dailyData || [],
+        hourlyDownloadData: loaded.hourlyDownloadData || {},
+        lastResetTime: loaded.lastResetTime || new Date().toISOString(),
+      };
+    }
+  } catch (error) {
+    console.error("Error loading stats:", error);
+  }
+  
+  // Return default stats
+  return {
+    totalGenerations: 0,
+    successfulGenerations: 0,
+    failedGenerations: 0,
+    totalProcessingTime: 0,
+    storyImagesGenerated: 0,
+    totalUploads: 0,
+    totalDownloads: 0,
+    storyDownloads: 0,
+    individualImageDownloads: 0,
+    totalPageViews: 0,
+    uniqueVisitors: 0,
+    rejectionCounts: {
+      poseMismatch: 0,
+      lightingMismatch: 0,
+      artifacts: 0,
+    },
+    deviceBreakdown: {
+      ios: 0,
+      android: 0,
+      desktop: 0,
+    },
+    downloadByType: {
+      withoutCollamin: 0,
+      withCollamin: 0,
+      storyComparison: 0,
+    },
+    dailyData: [],
+    hourlyDownloadData: {},
+    lastResetTime: new Date().toISOString(),
+  };
+}
+
+// Save stats to file
+function saveStats(data: StatsData) {
+  try {
+    // Ensure .next directory exists
+    const fs = require("node:fs");
+    const dir = join(process.cwd(), ".next");
+    if (!existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    writeFileSync(STATS_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error saving stats:", error);
+  }
+}
+
+// Initialize stats from file
+let stats: StatsData = loadStats();
 
 export const statsTracker = {
   // Record a successful generation
