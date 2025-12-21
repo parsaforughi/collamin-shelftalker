@@ -241,14 +241,19 @@ async function composeStoryComparison(
   }
 
   const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.12); // ~12% of width (larger, more prominent)
+  const logoSize = Math.round(width * 0.15); // ~15% of width (larger, more prominent)
   const fontSize = 38; // Increased font size for better visibility
   
-  // Position text
+  // Position text (right side)
   const topTextY = halfHeight - overlayPadding - logoSize - 25;
   const topTextX = width - overlayPadding;
   const bottomTextY = height - overlayPadding - logoSize - 25;
   const bottomTextX = width - overlayPadding;
+  
+  // Position logo (left side)
+  const logoX = overlayPadding; // Left side padding
+  const topLogoY = halfHeight - overlayPadding - logoSize;
+  const bottomLogoY = height - overlayPadding - logoSize;
 
   // Use canvas for everything: composite image, text, logo, and rounded corners frame
   const canvas = createCanvas(width, height);
@@ -273,13 +278,8 @@ async function composeStoryComparison(
   
   ctx.restore();
 
-  // Add logos with white tint using canvas
+  // Add logos with white tint using canvas (left side)
   if (logo) {
-    const topLogoY = halfHeight - overlayPadding - logoSize;
-    const topLogoX = width - overlayPadding - logoSize;
-    const bottomLogoY = height - overlayPadding - logoSize;
-    const bottomLogoX = width - overlayPadding - logoSize;
-    
     // Helper function to draw white-tinted logo
     const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
       const tempCanvas = createCanvas(size, size);
@@ -296,11 +296,11 @@ async function composeStoryComparison(
       ctx.restore();
     };
     
-    // Draw top logo
-    drawWhiteLogo(topLogoX, topLogoY, logoSize, 0.9); // Increased opacity for better visibility
+    // Draw top logo (left side, maximum opacity)
+    drawWhiteLogo(logoX, topLogoY, logoSize, 1.0); // Maximum opacity
     
-    // Draw bottom logo
-    drawWhiteLogo(bottomLogoX, bottomLogoY, logoSize, 0.9); // Increased opacity for better visibility
+    // Draw bottom logo (left side, maximum opacity)
+    drawWhiteLogo(logoX, bottomLogoY, logoSize, 1.0); // Maximum opacity
   }
 
   // Add rounded corners (soft, thin frame - elegant for mobile)
