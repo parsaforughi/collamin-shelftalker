@@ -283,10 +283,24 @@ async function composeStoryComparison(
     const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
       // First, draw a dark semi-transparent background behind logo for contrast
       const padding = Math.round(size * 0.15); // 15% padding around logo
+      const bgX = x - padding;
+      const bgY = y - padding;
+      const bgSize = size + padding * 2;
+      const radius = 8;
+      
       ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Dark background with 50% opacity
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Dark background with 60% opacity for better contrast
       ctx.beginPath();
-      ctx.roundRect(x - padding, y - padding, size + padding * 2, size + padding * 2, 8);
+      ctx.moveTo(bgX + radius, bgY);
+      ctx.lineTo(bgX + bgSize - radius, bgY);
+      ctx.quadraticCurveTo(bgX + bgSize, bgY, bgX + bgSize, bgY + radius);
+      ctx.lineTo(bgX + bgSize, bgY + bgSize - radius);
+      ctx.quadraticCurveTo(bgX + bgSize, bgY + bgSize, bgX + bgSize - radius, bgY + bgSize);
+      ctx.lineTo(bgX + radius, bgY + bgSize);
+      ctx.quadraticCurveTo(bgX, bgY + bgSize, bgX, bgY + bgSize - radius);
+      ctx.lineTo(bgX, bgY + radius);
+      ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
+      ctx.closePath();
       ctx.fill();
       ctx.restore();
       
