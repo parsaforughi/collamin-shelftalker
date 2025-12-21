@@ -241,8 +241,8 @@ async function composeStoryComparison(
   }
 
   const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.08); // ~8% of width (larger, more visible)
-  const fontSize = 26;
+  const logoSize = Math.round(width * 0.12); // ~12% of width (larger, more prominent)
+  const fontSize = 38; // Increased font size for better visibility
   
   // Position text
   const topTextY = halfHeight - overlayPadding - logoSize - 25;
@@ -261,7 +261,7 @@ async function composeStoryComparison(
   // Draw text directly on canvas (not via sharp composite) - elegant and refined
   ctx.save();
   ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; // Slightly higher opacity for better readability
+  ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   
@@ -297,10 +297,10 @@ async function composeStoryComparison(
     };
     
     // Draw top logo
-    drawWhiteLogo(topLogoX, topLogoY, logoSize, 0.75);
+    drawWhiteLogo(topLogoX, topLogoY, logoSize, 0.9); // Increased opacity for better visibility
     
     // Draw bottom logo
-    drawWhiteLogo(bottomLogoX, bottomLogoY, logoSize, 0.75);
+    drawWhiteLogo(bottomLogoX, bottomLogoY, logoSize, 0.9); // Increased opacity for better visibility
   }
 
   // Add rounded corners (soft, thin frame - elegant for mobile)
