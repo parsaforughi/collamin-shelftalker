@@ -40,6 +40,7 @@ interface StatsData {
   lastResetTime: string;
 }
 
+const STATS_FILE = join(process.cwd(), ".next", "stats.json");
 
 // Load stats from file or initialize
 function loadStats(): StatsData {
