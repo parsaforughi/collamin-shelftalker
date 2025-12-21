@@ -244,16 +244,15 @@ async function composeStoryComparison(
   const logoSize = Math.round(width * 0.18); // ~18% of width (larger, more prominent)
   const fontSize = 38; // Increased font size for better visibility
   
-  // Position text (right side)
-  const topTextY = halfHeight - overlayPadding - logoSize - 25;
-  const topTextX = width - overlayPadding;
-  const bottomTextY = height - overlayPadding - logoSize - 25;
-  const bottomTextX = width - overlayPadding;
-  
   // Position logo (left side, top)
   const logoX = overlayPadding; // Left side padding
   const topLogoY = overlayPadding; // Top padding for upper logo
   const bottomLogoY = halfHeight + overlayPadding; // Top of bottom half
+  
+  // Position text (left side, next to logo at top)
+  const textX = overlayPadding + logoSize + 20; // Next to logo with spacing
+  const topTextY = overlayPadding + logoSize / 2; // Vertically centered with logo
+  const bottomTextY = halfHeight + overlayPadding + logoSize / 2; // Vertically centered with logo
 
   // Use canvas for everything: composite image, text, logo, and rounded corners frame
   const canvas = createCanvas(width, height);
@@ -267,14 +266,14 @@ async function composeStoryComparison(
   ctx.save();
   ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
-  ctx.textAlign = "right";
+  ctx.textAlign = "left"; // Left aligned (next to logo)
   ctx.textBaseline = "middle";
   
-  // Draw "Without" text
-  ctx.fillText("Without", topTextX, topTextY);
+  // Draw "Without" text (top, next to logo)
+  ctx.fillText("Without", textX, topTextY);
   
-  // Draw "With" text
-  ctx.fillText("With", bottomTextX, bottomTextY);
+  // Draw "With" text (bottom, next to logo)
+  ctx.fillText("With", textX, bottomTextY);
   
   ctx.restore();
 
