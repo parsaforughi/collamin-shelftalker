@@ -241,7 +241,7 @@ async function composeStoryComparison(
   }
 
   const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.15); // ~15% of width (larger, more prominent)
+  const logoSize = Math.round(width * 0.18); // ~18% of width (larger, more prominent)
   const fontSize = 38; // Increased font size for better visibility
   
   // Position text (right side)
@@ -250,10 +250,10 @@ async function composeStoryComparison(
   const bottomTextY = height - overlayPadding - logoSize - 25;
   const bottomTextX = width - overlayPadding;
   
-  // Position logo (left side)
+  // Position logo (left side, top)
   const logoX = overlayPadding; // Left side padding
-  const topLogoY = halfHeight - overlayPadding - logoSize;
-  const bottomLogoY = height - overlayPadding - logoSize;
+  const topLogoY = overlayPadding; // Top padding for upper logo
+  const bottomLogoY = halfHeight + overlayPadding; // Top of bottom half
 
   // Use canvas for everything: composite image, text, logo, and rounded corners frame
   const canvas = createCanvas(width, height);
