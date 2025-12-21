@@ -777,13 +777,23 @@ export default function Page() {
 
         .comparison-label {
           background: rgba(255, 255, 255, 0.9);
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 500;
           color: #245b4e;
           backdrop-filter: blur(8px);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (min-width: 640px) {
+          .comparison-label {
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
         }
 
         /* Visual difference hints */
