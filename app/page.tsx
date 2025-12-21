@@ -765,44 +765,25 @@ export default function Page() {
 
         .comparison-labels {
           position: absolute;
-          top: 8px;
+          top: 12px;
           left: 0;
           right: 0;
           display: flex;
           justify-content: space-between;
-          padding: 0 8px;
+          padding: 0 16px;
           z-index: 22;
           pointer-events: none;
         }
 
-        @media (min-width: 640px) {
-          .comparison-labels {
-            top: 12px;
-            padding: 0 16px;
-          }
-        }
-
         .comparison-label {
-          background: rgba(255, 255, 255, 0.92);
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: 500;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
           color: #245b4e;
           backdrop-filter: blur(8px);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-          line-height: 1.3;
-          white-space: nowrap;
-        }
-
-        @media (min-width: 640px) {
-          .comparison-label {
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 6px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-          }
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Visual difference hints */
@@ -1019,8 +1000,8 @@ export default function Page() {
 
                   {/* Labels */}
                   <div className="comparison-labels">
-                    <div className="comparison-label">۲۰ سال بعد — بدون کلامین</div>
-                    <div className="comparison-label">۲۰ سال بعد — با کلامین</div>
+                    <div className="comparison-label">بی کلامین</div>
+                    <div className="comparison-label">با کلامین</div>
                   </div>
                 </div>
               </div>
