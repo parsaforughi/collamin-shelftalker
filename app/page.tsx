@@ -783,23 +783,25 @@ export default function Page() {
         }
 
         .comparison-label {
-          background: rgba(255, 255, 255, 0.9);
-          padding: 4px 10px;
-          border-radius: 6px;
-          font-size: 11px;
+          background: rgba(255, 255, 255, 0.92);
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-size: 10px;
           font-weight: 500;
           color: #245b4e;
           backdrop-filter: blur(8px);
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+          line-height: 1.3;
+          white-space: nowrap;
         }
 
         @media (min-width: 640px) {
           .comparison-label {
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
           }
         }
 
