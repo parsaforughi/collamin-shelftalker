@@ -1,8 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
-import { createCanvas, loadImage, registerFont } from "canvas";
-import { join } from "path";
-import { existsSync } from "node:fs";
 import { statsTracker } from "../stats-tracker";
 
 export const runtime = "nodejs";
@@ -141,214 +137,114 @@ If any mismatch occurs, regenerate until outputs are perfectly aligned.
 The comparison must be pixel-aligned.
 `;
 
-// -------------------- STORY COMPOSITION FUNCTION ----------------------
+// -------------------- NANO BANANA STORY GENERATION PROMPT ----------------------
 
-async function composeStoryComparison(
-  withoutCollaminBase64: string,
-  withCollaminBase64: string
-): Promise<string> {
-  // Register Inter font before any canvas operations
-  try {
-    // Try multiple possible paths for font file (development vs production)
-    const possiblePaths = [
-      join(process.cwd(), "public", "fonts", "Inter-VariableFont_opsz,wght.ttf"),
-      join(process.cwd(), ".next", "static", "fonts", "Inter-VariableFont_opsz,wght.ttf"),
-    ];
-    
-    let fontPath: string | null = null;
-    
-    for (const pathToTry of possiblePaths) {
-      if (existsSync(pathToTry)) {
-        fontPath = pathToTry;
-        break;
-      }
-    }
-    
-    if (fontPath) {
-      registerFont(fontPath, { family: "Inter" });
-      console.log("✅ Font registered from:", fontPath);
-    } else {
-      console.warn("⚠️ Could not find font file, text may render with default font");
-    }
-  } catch (fontError) {
-    console.warn("Could not register Inter font:", fontError);
-  }
+const NANO_BANANA_STORY_PROMPT = `You are given two reference images of the same person:
 
-  const width = 1080;
-  const height = 1920;
-  const halfHeight = height / 2;
+1) Image A: 20 years later WITHOUT Collamin
+2) Image B: 20 years later WITH Collamin
 
-  // Load images from base64
-  const withoutCollaminBuffer = Buffer.from(withoutCollaminBase64, "base64");
-  const withCollaminBuffer = Buffer.from(withCollaminBase64, "base64");
+These references are STRICT.
 
-  // Resize images to fit top/bottom halves (maintaining aspect ratio, cropping to center)
-  const topImage = await sharp(withoutCollaminBuffer)
-    .resize(width, halfHeight, {
-      fit: "cover",
-      position: "center"
-    })
-    .toBuffer();
+Your task is to generate a FINAL Instagram Story image.
 
-  const bottomImage = await sharp(withCollaminBuffer)
-    .resize(width, halfHeight, {
-      fit: "cover",
-      position: "center"
-    })
-    .toBuffer();
+REQUIREMENTS:
+- Aspect ratio: 9:16
+- Top half uses Image A
+- Bottom half uses Image B
+- Same scale and alignment
+- Clean horizontal divider
 
-  // Create background with light medical green/neutral gray
-  const background = sharp({
-    create: {
-      width,
-      height,
-      channels: 3,
-      background: { r: 245, g: 250, b: 250 } // Very light neutral gray-green
-    }
-  })
-    .png();
+Branding:
+- Add the word 'Without' in the bottom-right of the top half
+- Add the word 'With' in the bottom-right of the bottom half
+- Below each word, add a small white Collamin logo
 
-  // Composite images vertically with divider
-  const composite = await background
-    .composite([
-      { input: topImage, top: 0, left: 0 },
-      { input: bottomImage, top: halfHeight, left: 0 },
-      // Divider line (1px white line)
+STRICT RULES:
+- Do NOT change face identity
+- Do NOT change pose or expression
+- Do NOT change aging differences
+- Do NOT beautify or retouch
+- Do NOT add effects or filters
+- Do NOT add any elements except text and logo
+
+Style:
+- Minimal
+- Medical
+- Trustworthy
+- Instagram-ready
+
+Output ONE image only.`;
+
+// -------------------- NANO BANANA STORY GENERATION FUNCTION ----------------------
+
+async function generateStoryWithNanoBanana(
+  futureWithoutCollaminBase64: string,
+  futureWithCollaminBase64: string,
+  apiKey: string
+): Promise<string | null> {
+  console.log("🍌 [NanoBanana] Starting story generation...");
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+
+  const payload = {
+    contents: [
       {
-        input: {
-          create: {
-            width,
-            height: 2,
-            channels: 3,
-            background: { r: 200, g: 200, b: 200 }
+        role: "user",
+        parts: [
+          { text: NANO_BANANA_STORY_PROMPT },
+          // Image A: Without Collamin (for top half)
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: futureWithoutCollaminBase64
+            }
+          },
+          // Image B: With Collamin (for bottom half)
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: futureWithCollaminBase64
+            }
           }
-        },
-        top: halfHeight - 1,
-        left: 0
+        ]
       }
-    ])
-    .toBuffer();
+    ]
+  };
 
-  // Load Collamin logo for bottom-right overlays
-  let logo: any = null;
   try {
-    const fs = await import("fs/promises");
-    const logoPath = join(process.cwd(), "public", "collamin.png");
-    const logoBuffer = await fs.readFile(logoPath);
-    logo = await loadImage(logoBuffer);
-  } catch (logoError) {
-    console.warn("Could not load logo:", logoError);
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ [NanoBanana] API error:", response.status, errorText);
+      return null;
+    }
+
+    const result = await response.json();
+
+    // Extract base64 image from response
+    for (const candidate of result.candidates || []) {
+      for (const part of candidate.content?.parts || []) {
+        if (part.inlineData?.data) {
+          console.log("✅ [NanoBanana] Story generation successful");
+          return part.inlineData.data;
+        }
+      }
+    }
+
+    console.warn("⚠️ [NanoBanana] No image returned from API");
+    return null;
+  } catch (error: any) {
+    console.error("❌ [NanoBanana] Error:", error?.message || error);
+    return null;
   }
-
-  const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.22); // ~22% of width (larger, more prominent)
-  const fontSize = 38; // Increased font size for better visibility
-  
-  // Position logo (left side, top)
-  const logoX = overlayPadding; // Left side padding
-  const topLogoY = overlayPadding + 50; // Top padding for upper logo (space for text above)
-  const bottomLogoY = halfHeight + overlayPadding + 50; // Top of bottom half (space for text above)
-  
-  // Position text (above logo, left aligned)
-  const textX = overlayPadding; // Same X as logo (left aligned)
-  const topTextY = overlayPadding + 20; // Above top logo
-  const bottomTextY = halfHeight + overlayPadding + 20; // Above bottom logo
-
-  // Use canvas for everything: composite image, text, logo, and rounded corners frame
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext("2d");
-
-  // Draw the composite image (without text)
-  const compositeImg = await loadImage(composite);
-  ctx.drawImage(compositeImg, 0, 0);
-
-  // Draw text directly on canvas (not via sharp composite) - elegant and refined
-  ctx.save();
-  ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
-  ctx.textAlign = "left"; // Left aligned (above logo)
-  ctx.textBaseline = "top";
-  
-  // Draw "Without" text (above top logo)
-  ctx.fillText("Without", textX, topTextY);
-  
-  // Draw "With" text (above bottom logo)
-  ctx.fillText("With", textX, bottomTextY);
-  
-  ctx.restore();
-
-  // Add logos with white tint using canvas (left side)
-  if (logo) {
-    // Helper function to draw white-tinted logo with background for visibility
-    const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
-      // First, draw a dark semi-transparent background behind logo for contrast
-      const padding = Math.round(size * 0.15); // 15% padding around logo
-      const bgX = x - padding;
-      const bgY = y - padding;
-      const bgSize = size + padding * 2;
-      const radius = 8;
-      
-      ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Dark background with 60% opacity for better contrast
-      ctx.beginPath();
-      ctx.moveTo(bgX + radius, bgY);
-      ctx.lineTo(bgX + bgSize - radius, bgY);
-      ctx.quadraticCurveTo(bgX + bgSize, bgY, bgX + bgSize, bgY + radius);
-      ctx.lineTo(bgX + bgSize, bgY + bgSize - radius);
-      ctx.quadraticCurveTo(bgX + bgSize, bgY + bgSize, bgX + bgSize - radius, bgY + bgSize);
-      ctx.lineTo(bgX + radius, bgY + bgSize);
-      ctx.quadraticCurveTo(bgX, bgY + bgSize, bgX, bgY + bgSize - radius);
-      ctx.lineTo(bgX, bgY + radius);
-      ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-      
-      // Draw white-tinted logo
-      const tempCanvas = createCanvas(size, size);
-      const tempCtx = tempCanvas.getContext("2d");
-      
-      tempCtx.fillStyle = "white";
-      tempCtx.fillRect(0, 0, size, size);
-      tempCtx.globalCompositeOperation = "destination-in";
-      tempCtx.drawImage(logo, 0, 0, size, size);
-      
-      ctx.save();
-      ctx.globalAlpha = opacity;
-      ctx.drawImage(tempCanvas, x, y);
-      ctx.restore();
-    };
-    
-    // Draw top logo (left side, maximum opacity)
-    drawWhiteLogo(logoX, topLogoY, logoSize, 1.0); // Maximum opacity
-    
-    // Draw bottom logo (left side, maximum opacity)
-    drawWhiteLogo(logoX, bottomLogoY, logoSize, 1.0); // Maximum opacity
-  }
-
-  // Add rounded corners (soft, thin frame - elegant for mobile)
-  const radius = 20;
-  const framePadding = 8; // Reduced padding for cleaner look
-  ctx.strokeStyle = "rgba(200, 200, 200, 0.2)"; // More subtle, refined
-  ctx.lineWidth = 1; // Thinner line for elegant look on mobile
-  ctx.beginPath();
-  ctx.moveTo(framePadding + radius, framePadding);
-  ctx.lineTo(width - framePadding - radius, framePadding);
-  ctx.quadraticCurveTo(width - framePadding, framePadding, width - framePadding, framePadding + radius);
-  ctx.lineTo(width - framePadding, height - framePadding - radius);
-  ctx.quadraticCurveTo(width - framePadding, height - framePadding, width - framePadding - radius, height - framePadding);
-  ctx.lineTo(framePadding + radius, height - framePadding);
-  ctx.quadraticCurveTo(framePadding, height - framePadding, framePadding, height - framePadding - radius);
-  ctx.lineTo(framePadding, framePadding + radius);
-  ctx.quadraticCurveTo(framePadding, framePadding, framePadding + radius, framePadding);
-  ctx.closePath();
-  ctx.stroke();
-
-  // Convert canvas to buffer and then to base64
-  const finalBuffer = canvas.toBuffer("image/png");
-  const finalBase64 = finalBuffer.toString("base64");
-
-  return finalBase64;
 }
 
 // -------------------- MAIN ROUTE ----------------------
@@ -501,19 +397,27 @@ export async function POST(req: NextRequest) {
 
     console.log("📥 Both images generated successfully");
 
-    // Compose story comparison image
-    console.log("🎨 Composing story comparison image...");
+    // -------------------- NANO BANANA STORY GENERATION --------------------
+    // Nano Banana fully owns story image generation
+    // Code acts only as orchestrator - no canvas/sharp composition
+    
+    console.log("🍌 Generating story with Nano Banana...");
     let storyComparisonBase64: string | null = null;
     
     try {
-      storyComparisonBase64 = await composeStoryComparison(
+      storyComparisonBase64 = await generateStoryWithNanoBanana(
         withoutCollaminBase64,
-        withCollaminBase64
+        withCollaminBase64,
+        apiKey
       );
-      console.log("✅ Story comparison image composed successfully");
+      
+      if (storyComparisonBase64) {
+        console.log("✅ Story generated by Nano Banana successfully");
+      } else {
+        console.error("❌ Nano Banana story generation returned null");
+      }
     } catch (error: any) {
-      console.error("❌ Error composing story image:", error);
-      // Don't fail the request if story composition fails
+      console.error("❌ Error in Nano Banana story generation:", error);
     }
 
     // Calculate processing time and track success
@@ -525,6 +429,7 @@ export async function POST(req: NextRequest) {
     console.log("✅ Success tracked. Current stats:", JSON.stringify(statsTracker.getStats()));
 
     // Return JSON with all images as base64
+    // storyComparison: Generated entirely by Nano Banana (the ONLY image for sharing)
     return NextResponse.json({
       originalImage: userBase64,
       futureWithoutCollamin: withoutCollaminBase64,
