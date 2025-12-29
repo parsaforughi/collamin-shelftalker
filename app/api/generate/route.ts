@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { statsTracker } from "../stats-tracker";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 export const runtime = "nodejs";
 
@@ -219,6 +221,7 @@ Output ONE image only.`;
 async function generateStoryWithNanoBanana(
   futureWithoutCollaminBase64: string,
   futureWithCollaminBase64: string,
+  logoBase64: string,
   apiKey: string
 ): Promise<string | null> {
   console.log("🍌 [NanoBanana] Starting story generation...");
@@ -243,6 +246,13 @@ async function generateStoryWithNanoBanana(
             inlineData: {
               mimeType: "image/png",
               data: futureWithCollaminBase64
+            }
+          },
+          // Image C: Collamin logo (white logo reference)
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: logoBase64
             }
           }
         ]
@@ -443,9 +453,16 @@ export async function POST(req: NextRequest) {
     let storyComparisonBase64: string | null = null;
     
     try {
+      // Load Collamin logo as reference for Nano Banana
+      const logoPath = join(process.cwd(), "public", "collamin.png");
+      const logoBuffer = await readFile(logoPath);
+      const logoBase64 = logoBuffer.toString("base64");
+      console.log("✅ Collamin logo loaded for Nano Banana reference");
+      
       storyComparisonBase64 = await generateStoryWithNanoBanana(
         withoutCollaminBase64,
         withCollaminBase64,
+        logoBase64,
         apiKey
       );
       
