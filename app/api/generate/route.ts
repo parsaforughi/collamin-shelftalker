@@ -139,40 +139,78 @@ The comparison must be pixel-aligned.
 
 // -------------------- NANO BANANA STORY GENERATION PROMPT ----------------------
 
-const NANO_BANANA_STORY_PROMPT = `You are given two reference images of the same person:
+const NANO_BANANA_STORY_PROMPT = `You are given three STRICT visual references:
 
 1) Image A: 20 years later WITHOUT Collamin
 2) Image B: 20 years later WITH Collamin
+3) Image C: Official Collamin logo (white logo)
 
-These references are STRICT.
+These references are LOCKED.
 
-Your task is to generate a FINAL Instagram Story image.
+Your task is to generate ONE final Instagram Story image.
 
-REQUIREMENTS:
-- Aspect ratio: 9:16
-- Top half uses Image A
-- Bottom half uses Image B
-- Same scale and alignment
-- Clean horizontal divider
+────────────────────────────
+LAYOUT REQUIREMENTS
+────────────────────────────
 
-Branding:
-- Add the word 'Without' in the bottom-right of the top half
-- Add the word 'With' in the bottom-right of the bottom half
-- Below each word, add a small white Collamin logo
+- Aspect ratio: 9:16 (Instagram Story)
+- Vertical split layout:
+  - TOP half: Image A (WITHOUT Collamin)
+  - BOTTOM half: Image B (WITH Collamin)
 
-STRICT RULES:
-- Do NOT change face identity
-- Do NOT change pose or expression
-- Do NOT change aging differences
-- Do NOT beautify or retouch
-- Do NOT add effects or filters
-- Do NOT add any elements except text and logo
+CRITICAL FRAMING RULES:
+- The face must be FULLY visible in BOTH halves
+- Eyes, eyebrows, nose, mouth, and forehead MUST be visible
+- Identical framing and scale for both images
+- Face centered vertically and horizontally
+- No zoom, shift, or crop differences
 
-Style:
-- Minimal
+DIVIDER:
+- Clean, thin horizontal divider BETWEEN halves
+- Divider must NOT cross facial features
+
+────────────────────────────
+TEXT & BRANDING
+────────────────────────────
+
+TEXT:
+- Top half label: "Without"
+- Bottom half label: "With"
+
+LOGO:
+- Use ONLY the provided Collamin logo reference (Image C)
+- Logo color must remain white
+- Do NOT modify logo shape or style
+
+POSITIONING (IMPORTANT):
+- Place text + logo in the BOTTOM-RIGHT corner of EACH half
+- Text ABOVE the logo
+- Logo slightly larger and clearly visible (not tiny)
+- Maintain safe spacing from face and edges
+- Ensure symmetry between top and bottom halves
+
+────────────────────────────
+STYLE RULES
+────────────────────────────
+
 - Medical
+- Clean
+- Premium
 - Trustworthy
 - Instagram-ready
+
+STRICTLY FORBIDDEN:
+- Changing face identity
+- Changing pose or expression
+- Beautification or retouching
+- Skin smoothing
+- Removing wrinkles
+- Dramatic effects or filters
+- Any visual artifacts or scan lines
+- Recreating or stylizing the logo
+
+The final image must look professional,
+brand-safe, and suitable for direct Instagram Story sharing.
 
 Output ONE image only.`;
 
