@@ -145,9 +145,9 @@ const NANO_BANANA_STORY_PROMPT = `You are given three STRICT visual references:
 
 1) Image A: 20 years later WITHOUT Collamin
 2) Image B: 20 years later WITH Collamin
-3) Image C: Official Collamin logo (white logo)
+3) Image C: Official Collamin logo (THIS IS THE EXACT LOGO TO USE)
 
-These references are LOCKED.
+These references are LOCKED and MUST NOT be altered.
 
 Your task is to generate ONE final Instagram Story image.
 
@@ -179,15 +179,20 @@ TEXT:
 - Top half label: "Without"
 - Bottom half label: "With"
 
-LOGO:
-- Use ONLY the provided Collamin logo reference (Image C)
-- Logo color must remain white
-- Do NOT modify logo shape or style
+LOGO (CRITICAL - READ CAREFULLY):
+- Image C is the EXACT Collamin logo you MUST use
+- COPY the logo PIXEL-PERFECT from Image C
+- Do NOT redraw, recreate, or interpret the logo
+- Do NOT generate a new logo design
+- Do NOT stylize or modify the logo in any way
+- The logo must look IDENTICAL to Image C
+- Simply PLACE the exact logo from Image C into the final image
+- Scale it appropriately but preserve exact shape and details
 
 POSITIONING (IMPORTANT):
 - Place text + logo in the BOTTOM-RIGHT corner of EACH half
 - Text ABOVE the logo
-- Logo slightly larger and clearly visible (not tiny)
+- Logo clearly visible (not tiny)
 - Maintain safe spacing from face and edges
 - Ensure symmetry between top and bottom halves
 
@@ -209,7 +214,9 @@ STRICTLY FORBIDDEN:
 - Removing wrinkles
 - Dramatic effects or filters
 - Any visual artifacts or scan lines
-- Recreating or stylizing the logo
+- RECREATING or REDESIGNING the logo (use Image C exactly)
+- Making up a different logo design
+- Stylizing or artistically interpreting the logo
 
 The final image must look professional,
 brand-safe, and suitable for direct Instagram Story sharing.
