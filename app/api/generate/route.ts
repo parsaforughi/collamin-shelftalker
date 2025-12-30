@@ -278,17 +278,17 @@ async function composeStoryComparison(
 
   // Add logos with white tint using canvas (left side)
   if (logo) {
-    // Helper function to draw white-tinted logo with background for visibility
+    // Helper function to draw white-tinted logo with clean pill background
     const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
-      // First, draw a dark semi-transparent background behind logo for contrast
-      const padding = Math.round(size * 0.15); // 15% padding around logo
+      // Clean pill design - minimal, lovely, high visibility
+      const padding = Math.round(size * 0.12); // Tighter padding for minimal look
       const bgX = x - padding;
       const bgY = y - padding;
       const bgSize = size + padding * 2;
-      const radius = 8;
+      const radius = 14; // More rounded for soft, modern pill shape
       
       ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Dark background with 60% opacity for better contrast
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Slightly softer dark background
       ctx.beginPath();
       ctx.moveTo(bgX + radius, bgY);
       ctx.lineTo(bgX + bgSize - radius, bgY);
@@ -301,6 +301,11 @@ async function composeStoryComparison(
       ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
       ctx.closePath();
       ctx.fill();
+      
+      // Subtle white border for polish
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
       ctx.restore();
       
       // Draw white-tinted logo
