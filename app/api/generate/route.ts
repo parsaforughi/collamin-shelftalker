@@ -244,15 +244,14 @@ async function composeStoryComparison(
   const logoSize = Math.round(width * 0.22); // ~22% of width (larger, more prominent)
   const fontSize = 38; // Increased font size for better visibility
   
-  // Position logo (left side, top)
+  // Position logo (left side, bottom of bottom half only)
   const logoX = overlayPadding; // Left side padding
-  const topLogoY = overlayPadding + 50; // Top padding for upper logo (space for text above)
-  const bottomLogoY = halfHeight + overlayPadding + 50; // Top of bottom half (space for text above)
+  const bottomLogoY = height - overlayPadding - logoSize; // Bottom of image, above padding
   
-  // Position text (above logo, left aligned)
-  const textX = overlayPadding; // Same X as logo (left aligned)
-  const topTextY = overlayPadding + 20; // Above top logo
-  const bottomTextY = halfHeight + overlayPadding + 20; // Above bottom logo
+  // Position text (bottom left of each half)
+  const textX = overlayPadding; // Left aligned
+  const topTextY = halfHeight - overlayPadding - fontSize - 10; // Bottom of top half
+  const bottomTextY = bottomLogoY - fontSize - 20; // Above the logo in bottom half
 
   // Use canvas for everything: composite image, text, logo, and rounded corners frame
   const canvas = createCanvas(width, height);
@@ -266,13 +265,13 @@ async function composeStoryComparison(
   ctx.save();
   ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
-  ctx.textAlign = "left"; // Left aligned (above logo)
+  ctx.textAlign = "left"; // Left aligned
   ctx.textBaseline = "top";
   
-  // Draw "Without" text (above top logo)
+  // Draw "Without" text (bottom left of top half, no logo)
   ctx.fillText("Without", textX, topTextY);
   
-  // Draw "With" text (above bottom logo)
+  // Draw "With" text (bottom left of bottom half, above logo)
   ctx.fillText("With", textX, bottomTextY);
   
   ctx.restore();
@@ -319,10 +318,8 @@ async function composeStoryComparison(
       ctx.restore();
     };
     
-    // Draw top logo (left side, maximum opacity)
-    drawWhiteLogo(logoX, topLogoY, logoSize, 1.0); // Maximum opacity
-    
-    // Draw bottom logo (left side, maximum opacity)
+    // Draw bottom logo only (left side, maximum opacity)
+    // Top half has no logo - only "Without" text
     drawWhiteLogo(logoX, bottomLogoY, logoSize, 1.0); // Maximum opacity
   }
 
