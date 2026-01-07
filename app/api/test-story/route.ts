@@ -144,12 +144,12 @@ async function composeStoryComparison(
 
   // Add logo with clean, minimal style (bottom half only)
   if (logo) {
-    // Just draw the logo with a subtle shadow - no background box
+    // Draw the logo with a strong, eye-catching shadow
     ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-    ctx.shadowBlur = 16;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowBlur = 30;
     ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowOffsetY = 8;
     
     // Draw white-tinted logo
     const tempCanvas = createCanvas(logoSize, logoSize);
