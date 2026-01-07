@@ -12,8 +12,6 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasPlayedDiscoveryAnimation, setHasPlayedDiscoveryAnimation] = useState(false);
-  const [testStory, setTestStory] = useState<string | null>(null);
-  const [testLoading, setTestLoading] = useState(false);
 
   // cleanup preview url
   useEffect(() => {
@@ -256,31 +254,6 @@ export default function Page() {
       console.error("Error sharing:", err);
       // Fallback: Auto-download
       handleDownloadStory();
-    }
-  }
-
-  // Test story design with mock data
-  async function handleTestStory() {
-    setTestLoading(true);
-    setTestStory(null);
-    
-    try {
-      const res = await fetch("/api/test-story");
-      if (!res.ok) {
-        console.error("Test story failed");
-        setTestLoading(false);
-        return;
-      }
-      
-      const data = await res.json();
-      if (data.storyComparison) {
-        const storyBlob = base64ToBlob(data.storyComparison, "image/png");
-        setTestStory(URL.createObjectURL(storyBlob));
-      }
-      setTestLoading(false);
-    } catch (err) {
-      console.error("Test story error", err);
-      setTestLoading(false);
     }
   }
 
@@ -1100,69 +1073,6 @@ export default function Page() {
               collamin.iran
             </a>
           </footer>
-
-          {/* TEST DESIGN SECTION (Development Only) */}
-          <div className="mt-8 pt-6 border-t border-gray-300">
-            <p className="text-center text-xs text-gray-500 mb-3">🧪 تست طراحی استوری</p>
-            <button
-              onClick={handleTestStory}
-              disabled={testLoading}
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                borderRadius: "12px",
-                background: testLoading ? "#ccc" : "#666",
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: "14px",
-                border: "none",
-                cursor: testLoading ? "default" : "pointer",
-              }}
-            >
-              {testLoading ? "در حال ساخت..." : "تست طراحی با Mock Data"}
-            </button>
-            
-            {testStory && (
-              <div className="mt-4">
-                <p className="text-center text-xs text-gray-500 mb-2">پیش‌نمایش استوری:</p>
-                <div style={{ 
-                  borderRadius: "16px", 
-                  overflow: "hidden",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)"
-                }}>
-                  <img 
-                    src={testStory} 
-                    alt="Test Story Preview" 
-                    style={{ width: "100%", display: "block" }}
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    const a = document.createElement("a");
-                    a.href = testStory;
-                    a.download = "test-story-preview.png";
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                  }}
-                  style={{
-                    width: "100%",
-                    marginTop: "12px",
-                    padding: "0.6rem",
-                    borderRadius: "10px",
-                    background: "#444",
-                    color: "#fff",
-                    fontWeight: 500,
-                    fontSize: "13px",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  دانلود تست
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </main>
     </>
