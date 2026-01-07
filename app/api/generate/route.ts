@@ -261,12 +261,18 @@ async function composeStoryComparison(
   const compositeImg = await loadImage(composite);
   ctx.drawImage(compositeImg, 0, 0);
 
-  // Draw text directly on canvas (not via sharp composite) - elegant and refined
+  // Draw text directly on canvas - elegant and refined
   ctx.save();
   ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
   ctx.textAlign = "left"; // Left aligned
   ctx.textBaseline = "top";
+  
+  // Add text shadow for better visibility
+  ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 2;
   
   // Draw "Without" text (bottom left of top half, no logo)
   ctx.fillText("Without", textX, topTextY);
@@ -276,56 +282,26 @@ async function composeStoryComparison(
   
   ctx.restore();
 
-  // Add logos with white tint using canvas (left side)
+  // Add logo with clean, minimal style (bottom half only - no background box, just shadow)
   if (logo) {
-    // Helper function to draw white-tinted logo with clean pill background
-    const drawWhiteLogo = (x: number, y: number, size: number, opacity: number) => {
-      // Clean pill design - minimal, lovely, high visibility
-      const padding = Math.round(size * 0.12); // Tighter padding for minimal look
-      const bgX = x - padding;
-      const bgY = y - padding;
-      const bgSize = size + padding * 2;
-      const radius = 14; // More rounded for soft, modern pill shape
-      
-      ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Slightly softer dark background
-      ctx.beginPath();
-      ctx.moveTo(bgX + radius, bgY);
-      ctx.lineTo(bgX + bgSize - radius, bgY);
-      ctx.quadraticCurveTo(bgX + bgSize, bgY, bgX + bgSize, bgY + radius);
-      ctx.lineTo(bgX + bgSize, bgY + bgSize - radius);
-      ctx.quadraticCurveTo(bgX + bgSize, bgY + bgSize, bgX + bgSize - radius, bgY + bgSize);
-      ctx.lineTo(bgX + radius, bgY + bgSize);
-      ctx.quadraticCurveTo(bgX, bgY + bgSize, bgX, bgY + bgSize - radius);
-      ctx.lineTo(bgX, bgY + radius);
-      ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
-      ctx.closePath();
-      ctx.fill();
-      
-      // Subtle white border for polish
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-      
-      // Draw white-tinted logo
-      const tempCanvas = createCanvas(size, size);
-      const tempCtx = tempCanvas.getContext("2d");
-      
-      tempCtx.fillStyle = "white";
-      tempCtx.fillRect(0, 0, size, size);
-      tempCtx.globalCompositeOperation = "destination-in";
-      tempCtx.drawImage(logo, 0, 0, size, size);
-      
-      ctx.save();
-      ctx.globalAlpha = opacity;
-      ctx.drawImage(tempCanvas, x, y);
-      ctx.restore();
-    };
+    // Just draw the logo with a subtle shadow - no background box
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 16;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
     
-    // Draw bottom logo only (left side, maximum opacity)
-    // Top half has no logo - only "Without" text
-    drawWhiteLogo(logoX, bottomLogoY, logoSize, 1.0); // Maximum opacity
+    // Draw white-tinted logo
+    const tempCanvas = createCanvas(logoSize, logoSize);
+    const tempCtx = tempCanvas.getContext("2d");
+    
+    tempCtx.fillStyle = "white";
+    tempCtx.fillRect(0, 0, logoSize, logoSize);
+    tempCtx.globalCompositeOperation = "destination-in";
+    tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
+    
+    ctx.drawImage(tempCanvas, logoX, bottomLogoY);
+    ctx.restore();
   }
 
   // Add rounded corners (soft, thin frame - elegant for mobile)
