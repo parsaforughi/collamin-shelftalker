@@ -147,12 +147,12 @@ async function composeStoryComparison(
   withoutCollaminBase64: string,
   withCollaminBase64: string
 ): Promise<string> {
-  // Register Inter font before any canvas operations
+  // Register Poppins Bold font before any canvas operations
   try {
     // Try multiple possible paths for font file (development vs production)
     const possiblePaths = [
-      join(process.cwd(), "public", "fonts", "Inter-VariableFont_opsz,wght.ttf"),
-      join(process.cwd(), ".next", "static", "fonts", "Inter-VariableFont_opsz,wght.ttf"),
+      join(process.cwd(), "public", "fonts", "Poppins-Bold.ttf"),
+      join(process.cwd(), ".next", "static", "fonts", "Poppins-Bold.ttf"),
     ];
     
     let fontPath: string | null = null;
@@ -165,13 +165,13 @@ async function composeStoryComparison(
     }
     
     if (fontPath) {
-      registerFont(fontPath, { family: "Inter" });
+      registerFont(fontPath, { family: "Poppins", weight: "bold" });
       console.log("✅ Font registered from:", fontPath);
     } else {
       console.warn("⚠️ Could not find font file, text may render with default font");
     }
   } catch (fontError) {
-    console.warn("Could not register Inter font:", fontError);
+    console.warn("Could not register Poppins font:", fontError);
   }
 
   const width = 1080;
@@ -263,7 +263,7 @@ async function composeStoryComparison(
 
   // Draw text directly on canvas - bold and visible
   ctx.save();
-  ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (semi-bold)
+  ctx.font = `bold ${fontSize}px "Poppins"`; // Poppins Bold
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
   ctx.textAlign = "left"; // Left aligned
   ctx.textBaseline = "top";
