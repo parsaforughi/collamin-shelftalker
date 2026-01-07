@@ -121,9 +121,9 @@ async function composeStoryComparison(
   const compositeImg = await loadImage(composite);
   ctx.drawImage(compositeImg, 0, 0);
 
-  // Draw text directly on canvas - elegant and refined
+  // Draw text directly on canvas - bold and visible
   ctx.save();
-  ctx.font = `400 ${fontSize}px "Inter"`; // Inter font with weight 400 (regular, more refined)
+  ctx.font = `600 ${fontSize}px "Inter"`; // Inter font with weight 600 (semi-bold)
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; // Higher opacity for better visibility
   ctx.textAlign = "left"; // Left aligned
   ctx.textBaseline = "top";
