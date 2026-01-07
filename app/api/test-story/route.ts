@@ -101,7 +101,7 @@ async function composeStoryComparison(
   }
 
   const overlayPadding = 40;
-  const logoSize = Math.round(width * 0.22); // ~22% of width (larger, more prominent)
+  const logoSize = Math.round(width * 0.28); // ~28% of width (bigger, more visible)
   const fontSize = 38; // Increased font size for better visibility
   
   // Position logo (left side, bottom of bottom half only)
@@ -142,16 +142,9 @@ async function composeStoryComparison(
   
   ctx.restore();
 
-  // Add logo with clean, minimal style (bottom half only)
+  // Add logo with layered shadows for maximum visibility
   if (logo) {
-    // Draw the logo with a strong, eye-catching shadow
-    ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 8;
-    
-    // Draw white-tinted logo
+    // Create white-tinted logo once
     const tempCanvas = createCanvas(logoSize, logoSize);
     const tempCtx = tempCanvas.getContext("2d");
     
@@ -160,6 +153,30 @@ async function composeStoryComparison(
     tempCtx.globalCompositeOperation = "destination-in";
     tempCtx.drawImage(logo, 0, 0, logoSize, logoSize);
     
+    // Layer 1: Deep outer shadow (darkest, most blurred)
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+    ctx.shadowBlur = 50;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 10;
+    ctx.drawImage(tempCanvas, logoX, bottomLogoY);
+    ctx.restore();
+    
+    // Layer 2: Mid shadow (medium)
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+    ctx.shadowBlur = 25;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 6;
+    ctx.drawImage(tempCanvas, logoX, bottomLogoY);
+    ctx.restore();
+    
+    // Layer 3: Sharp inner shadow (crisp edge)
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 3;
     ctx.drawImage(tempCanvas, logoX, bottomLogoY);
     ctx.restore();
   }
