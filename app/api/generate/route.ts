@@ -6,6 +6,8 @@ import { existsSync } from "node:fs";
 import { statsTracker } from "../stats-tracker";
 
 export const runtime = "nodejs";
+// Allow up to 60s so Gemini + story composition can finish (~20s observed)
+export const maxDuration = 60;
 
 // ---------------------- PROMPTS ------------------------
 

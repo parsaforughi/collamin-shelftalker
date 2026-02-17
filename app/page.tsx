@@ -68,11 +68,18 @@ export default function Page() {
     const formData = new FormData();
     formData.append("image", image);
 
+    // Generation can take ~20–60s; use 90s timeout so we don't abort before server responds
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90_000);
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -128,9 +135,15 @@ export default function Page() {
         setError("خطا در پردازش تصویر");
         setLoading(false);
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
       console.error("Generate error", err);
-      setError("خطا در اتصال به سرور. لطفا اتصال اینترنت خود را بررسی کنید.");
+      const isAbort = err instanceof Error && err.name === "AbortError";
+      if (isAbort) {
+        setError("زمان درخواست تمام شد. تولید تصویر حدود ۲۰ ثانیه طول می‌کشد؛ لطفا دوباره تلاش کنید.");
+      } else {
+        setError("خطا در اتصال به سرور. لطفا اتصال اینترنت خود را بررسی کنید.");
+      }
       setLoading(false);
     }
   }
@@ -939,7 +952,7 @@ export default function Page() {
               onClick={handleGenerate}
               className="primary-btn"
             >
-              {loading ? "در حال آماده‌سازی..." : "نشونم بده"}
+              {loading ? "در حال تولید تصویر… حدود ۲۰ ثانیه صبر کنید" : "نشونم بده"}
               {!loading && <span className="btn-shimmer" />}
             </button>
           </div>

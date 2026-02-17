@@ -40,6 +40,13 @@ public/
   collamin-bottle.webp // Product image
 ```
 
+## شمارنده استفاده (Stats)
+برای دیدن تعداد دفعات استفاده از ابزار، به آدرس پروژه **`/stats`** را اضافه کنید:
+- لوکال: `http://localhost:3000/stats`
+- پروداکشن: `https://your-domain.com/stats`
+
+در این صفحه شمارنده استفاده، تعداد درخواست‌های ناموفق، تصاویر استوری ساخته‌شده و میانگین زمان تولید نمایش داده می‌شود.
+
 ## Notes
 - The API route generates two images: one showing natural aging without skincare, and one with Collamin skincare
 - A third vertical story image is composed for Instagram Stories
