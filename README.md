@@ -14,7 +14,7 @@ Seylane · TypeScript · Next.js 14
 
 One portrait. Two futures. Twenty years.
 
-`seylane` · `collamin` · `shelf-talker` · `nextjs` · `typescript` · `google-gemini` · `skincare` · `rtl` · `persian`
+`seylane` · `collamin` · `shelf-talker` · `nextjs` · `typescript` · `google-gemini` · `skincare`
 
 </div>
 
@@ -27,13 +27,13 @@ Campaign shelf-talker for **Collamin**. A guest uploads a vertical portrait. The
 - **Without** — +20 years, natural aging, no consistent skincare
 - **With** — the same +20 years, skin maintained with Collamin
 
-Identity, pose, crop, and lighting stay locked. The Node route then composes a **1080×1920** story still (Without over With, Poppins labels, logo on the lower half). The Persian RTL surface is a comparison slider, a download of all three stills, and Web Share for Stories (`collamin.iran`).
+Identity, pose, crop, and lighting stay locked. The Node route then composes a **1080×1920** story still (Without over With, Poppins labels, logo on the lower half). The guest surface is a comparison slider, a download of all three stills, and Web Share for Stories (`collamin.iran`).
 
 **GitHub About** for this repository (name unchanged):
 
-> Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split. Persian RTL.
+> Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split.
 
-**Topics:** `seylane` `collamin` `shelf-talker` `nextjs` `typescript` `google-gemini` `image-generation` `skincare` `rtl` `persian`
+**Topics:** `seylane` `collamin` `shelf-talker` `nextjs` `typescript` `google-gemini` `image-generation` `skincare`
 
 ## Surface
 

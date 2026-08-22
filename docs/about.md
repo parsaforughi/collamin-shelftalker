@@ -5,7 +5,7 @@
 **Description** (GitHub About, ≤350):
 
 ```
-Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split. Persian RTL.
+Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split.
 ```
 
 **Topics**
@@ -19,8 +19,6 @@ typescript
 google-gemini
 image-generation
 skincare
-rtl
-persian
 ```
 
 **Website:** leave empty unless a live host is already attached.
