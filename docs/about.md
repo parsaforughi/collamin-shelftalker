@@ -5,13 +5,12 @@
 **Description** (GitHub About, ≤350):
 
 ```
-Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split.
+Collamin shelf-talker. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without comparison → 1080×1920 story split.
 ```
 
 **Topics**
 
 ```
-seylane
 collamin
 shelf-talker
 nextjs
@@ -23,4 +22,4 @@ skincare
 
 **Website:** leave empty unless a live host is already attached.
 
-These values match the surface in this repository. Apply them under GitHub → About if the token cannot write repository metadata.
+Product-only. Apply these values under GitHub → About if the token cannot write repository metadata.

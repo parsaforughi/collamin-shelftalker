@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/og.png" alt="Collamin shelf-talker — YOU ARE COLLAMIN. Without / With. +20 years. Seylane." width="100%" />
+  <img src="docs/og.png" alt="Collamin shelf-talker — YOU ARE COLLAMIN. Without / With. +20 years." width="100%" />
 </p>
 
 <p align="center">
@@ -10,11 +10,11 @@
 
 # Collamin · shelf-talker
 
-Seylane · TypeScript · Next.js 14
+TypeScript · Next.js 14
 
 One portrait. Two futures. Twenty years.
 
-`seylane` · `collamin` · `shelf-talker` · `nextjs` · `typescript` · `google-gemini` · `skincare`
+`collamin` · `shelf-talker` · `nextjs` · `typescript` · `google-gemini` · `skincare`
 
 </div>
 
@@ -22,7 +22,7 @@ One portrait. Two futures. Twenty years.
 
 ## About
 
-Campaign shelf-talker for **Collamin**. A guest uploads a vertical portrait. The App Router posts it to `POST /api/generate`, which calls Gemini (`gemini-3-pro-image-preview`) twice on the same face:
+**Collamin** shelf-talker. A guest uploads a vertical portrait. The App Router posts it to `POST /api/generate`, which calls Gemini (`gemini-3-pro-image-preview`) twice on the same face:
 
 - **Without** — +20 years, natural aging, no consistent skincare
 - **With** — the same +20 years, skin maintained with Collamin
@@ -31,9 +31,9 @@ Identity, pose, crop, and lighting stay locked. The Node route then composes a *
 
 **GitHub About** for this repository (name unchanged):
 
-> Seylane shelf-talker for Collamin. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without Collamin → 1080×1920 story split.
+> Collamin shelf-talker. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without comparison → 1080×1920 story split.
 
-**Topics:** `seylane` `collamin` `shelf-talker` `nextjs` `typescript` `google-gemini` `image-generation` `skincare`
+**Topics:** `collamin` `shelf-talker` `nextjs` `typescript` `google-gemini` `image-generation` `skincare`
 
 ## Surface
 
@@ -46,7 +46,7 @@ Identity, pose, crop, and lighting stay locked. The Node route then composes a *
 | `GET /api/analytics` | Campaign analytics JSON |
 | `GET /api/health` | `{ status: "ok", service: "collamin-shelftalker" }` |
 
-Upload accepts PNG/JPG. The client rejects landscape frames (`height` must exceed `width`). Generation is observed around 20s; the browser aborts at 90s.
+Upload accepts PNG/JPG. The browser rejects landscape frames (`height` must exceed `width`). Generation is observed around 20s; the request aborts at 90s.
 
 ## Run
 
