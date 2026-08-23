@@ -1,53 +1,75 @@
-# Collamin Shelftalker
+<p align="center">
+  <img src="docs/og.png" alt="Collamin shelf-talker — YOU ARE COLLAMIN. Without / With. +20 years." width="100%" />
+</p>
 
-A Next.js 14 application that generates realistic aging projections showing how your skin will look in 20 years with and without Collamin skincare using Google Gemini AI.
+<p align="center">
+  <img src="public/collamin.png" width="168" alt="Collamin" />
+</p>
 
-## Features
-- App Router architecture with custom API route for Google Gemini image generation
-- Calm, medical-grade interface with Persian (RTL) support
-- Side-by-side comparison slider showing aging projections
-- Story-ready vertical comparison image generation
-- Responsive layout for mobile + desktop
+<div align="center">
 
-## Getting Started
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
-2. **Configure environment**
-   Set your Google Gemini API key:
-   ```bash
-   GEMINI_API_KEY=your_api_key_here
-   ```
-3. **Run the dev server**
-   ```bash
-   npm run dev
-   ```
-   Visit `http://localhost:3000` and upload a portrait.
+# Collamin · shelf-talker
 
-## Deployment
-- Push the project to GitHub and deploy with [Vercel](https://vercel.com/).
-- Set the `GEMINI_API_KEY` secret in the Vercel dashboard.
+TypeScript · Next.js 14
 
-## Project Structure
+One portrait. Two futures. Twenty years.
+
+`collamin` · `shelf-talker` · `nextjs` · `typescript` · `google-gemini` · `skincare`
+
+</div>
+
+---
+
+## About
+
+**Collamin** shelf-talker. A guest uploads a vertical portrait. The App Router posts it to `POST /api/generate`, which calls Gemini (`gemini-3-pro-image-preview`) twice on the same face:
+
+- **Without** — +20 years, natural aging, no consistent skincare
+- **With** — the same +20 years, skin maintained with Collamin
+
+Identity, pose, crop, and lighting stay locked. The Node route then composes a **1080×1920** story still (Without over With, Poppins labels, logo on the lower half). The guest surface is a comparison slider, a download of all three stills, and Web Share for Stories (`collamin.iran`).
+
+**GitHub About** for this repository (name unchanged):
+
+> Collamin shelf-talker. Next.js 14 / TypeScript. Portrait in → Gemini +20-year with/without comparison → 1080×1920 story split.
+
+**Topics:** `collamin` `shelf-talker` `nextjs` `typescript` `google-gemini` `image-generation` `skincare`
+
+## Surface
+
+| Path | Role |
+| --- | --- |
+| `/` | Portrait upload, generate, comparison slider, download, story share |
+| `/stats` | Hidden usage counter — successes, failures, story stills, average time |
+| `POST /api/generate` | Gemini pair + story compose · `maxDuration` 60s |
+| `GET /api/stats` | Counter JSON |
+| `GET /api/analytics` | Campaign analytics JSON |
+| `GET /api/health` | `{ status: "ok", service: "collamin-shelftalker" }` |
+
+Upload accepts PNG/JPG. The browser rejects landscape frames (`height` must exceed `width`). Generation is observed around 20s; the request aborts at 90s.
+
+## Run
+
+```bash
+npm install
 ```
-app/
-  layout.tsx        // Global layout & fonts
-  page.tsx          // Upload UI + comparison slider
-  api/generate/     // Serverless route calling Google Gemini
-public/
-  collamin_logo.png // Collamin logo asset
-  collamin-bottle.webp // Product image
+
+`/api/generate` requires `GEMINI_API_KEY`. `.env.local.example` also lists `N8N_WEBHOOK_URL` and `NEXT_PUBLIC_SITE_URL` (passed through `next.config.mjs`).
+
+```bash
+npm run dev
 ```
 
-## شمارنده استفاده (Stats)
-برای دیدن تعداد دفعات استفاده از ابزار، به آدرس پروژه **`/stats`** را اضافه کنید:
-- لوکال: `http://localhost:3000/stats`
-- پروداکشن: `https://your-domain.com/stats`
+Open `http://localhost:3000`. Usage: `http://localhost:3000/stats`.
 
-در این صفحه شمارنده استفاده، تعداد درخواست‌های ناموفق، تصاویر استوری ساخته‌شده و میانگین زمان تولید نمایش داده می‌شود.
+## Stack
+
+Next.js 14.1 · React 18.2 · TypeScript 5.3 · Tailwind 3.4 · sharp · node-canvas · `@google/generative-ai`
+
+Story compose registers `public/fonts/Poppins-Bold.ttf` when present. Counters persist to `.next/stats.json`. Story composition is best-effort — a failed compose still returns the two Gemini stills.
 
 ## Notes
-- The API route generates two images: one showing natural aging without skincare, and one with Collamin skincare
-- A third vertical story image is composed for Instagram Stories
-- Portrait orientation images only (height > width)
+
+- Portrait only. Same person, same age on both sides; only skin condition differs.
+- Footer tags [collamin.iran](https://www.instagram.com/collamin.iran/).
+- Set `GEMINI_API_KEY` on the host that already serves this app.
